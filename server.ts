@@ -883,7 +883,10 @@ async function handleChatInput(
   let instantReply: string | null = null;
   let instantMetadata: any = undefined;
 
-  if (cleanMessage === '1' || cleanMessage.includes('pre-book food') || cleanMessage.includes('prebook food')) {
+  const greetings = ['hi', 'hello', 'hey', 'start', 'main menu', 'menu list', 'options', 'canteen'];
+  if (greetings.includes(cleanMessage) || cleanMessage === 'help') {
+    instantReply = `👋 *Welcome to LPU Smart Canteen Pre-Booking!* \n\nAvoid long queues and pre-book your meals from campus stalls in seconds.\n\nReply with a number below to navigate:\n1️⃣ *Pre-book Food* (Select a stall & start booking)\n2️⃣ *Browse Menus* (View digital menus & pricing)\n3️⃣ *Track Order* (Check preparation status)\n4️⃣ *FAQs & Support* (Get answers to common questions)\n\n💡 _Or simply chat with me, like: "Suggest a healthy breakfast under ₹100!"_`;
+  } else if (cleanMessage === '1' || cleanMessage.includes('pre-book food') || cleanMessage.includes('prebook food')) {
     instantReply = `🍔 *Choose a Food Stall to Pre-book from:* \n\n${dbState.stalls.map((s, idx) => `*${idx + 1}.* *${s.name}* (Prep time: ~${s.preparationTimeEst} mins)\n   _Specialty:_ ${s.cuisine}`).join('\n\n')}\n\nSimply reply with the food item name (e.g., *Veg Burger* or *Chole Bhature*) that you want to pre-book!`;
     instantMetadata = {
       type: 'menu',
@@ -1301,7 +1304,7 @@ app.post("/webhook/twilio", express.urlencoded({ extended: false }), async (req,
       res.type('text/xml');
       res.send(`
         <Response>
-          <Message>✅ *WhatsApp Account Linked Successfully!*\n\nHello *${student.name}*, your WhatsApp is now linked to your student profile (Reg: *${targetReg}*).\n\nYour balance is *₹${student.balance}*. You can now browse menus and pre-book meals directly from here! Try typing *menu*.</Message>
+          <Message>✅ *WhatsApp Account Linked Successfully!*\n\nHello *${student.name}*, your WhatsApp is now linked to your student profile (Reg: *${targetReg}*).\nYour balance is *₹${student.balance}*.\n\nReply with a number below to navigate:\n1️⃣ *Pre-book Food*\n2️⃣ *Browse Menus*\n3️⃣ *Track Order*\n4️⃣ *FAQs & Support*</Message>
         </Response>
       `);
       return;
