@@ -6,6 +6,19 @@ import {
 } from 'lucide-react';
 import { FoodStall, Order, StudentProfile, OrderStatus } from '../types';
 
+// Helper to determine the API Base URL
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const isCapacitor = (window as any).Capacitor?.isNativePlatform;
+    if (isCapacitor) {
+      return 'http://10.0.2.2:3000';
+    }
+  }
+  return '';
+};
+
+const API_BASE = getApiBase();
+
 interface DeveloperDashboardProps {
   stalls: FoodStall[];
   orders: Order[];
@@ -58,7 +71,7 @@ export default function DeveloperDashboard({
 
   const fetchBackupStatus = async () => {
     try {
-      const res = await fetch('/api/backup/status');
+      const res = await fetch(`${API_BASE}/api/backup/status`);
       if (res.ok) {
         const data = await res.json();
         setBackupStatus(data);
@@ -71,7 +84,7 @@ export default function DeveloperDashboard({
   const handleManualBackup = async () => {
     setBackingUp(true);
     try {
-      const res = await fetch('/api/backup/trigger', { method: 'POST' });
+      const res = await fetch(`${API_BASE}/api/backup/trigger`, { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         setBackupStatus({
@@ -106,7 +119,7 @@ export default function DeveloperDashboard({
   // Fetch student chats from backend
   const fetchChats = async () => {
     try {
-      const res = await fetch('/api/chats');
+      const res = await fetch(`${API_BASE}/api/chats`);
       if (res.ok) {
         const chatLogs: StudentChat[] = await res.json();
         setChats(chatLogs);

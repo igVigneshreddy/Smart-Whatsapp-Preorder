@@ -7,6 +7,23 @@ import VendorDashboard from './components/VendorDashboard';
 import CheckoutSimulator from './components/CheckoutSimulator';
 import LoginScreen from './components/LoginScreen';
 
+// Helper to determine the API Base URL
+// On Web: empty string (relative)
+// On Android: Use the computer's local IP or localhost (if emulator)
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const isCapacitor = (window as any).Capacitor?.isNativePlatform;
+    if (isCapacitor) {
+      // DEFAULT: Replace this with your computer's IP (e.g., http://192.168.1.5:3000)
+      // For Android Emulator, 10.0.2.2 points to the host machine.
+      return 'http://10.0.2.2:3000';
+    }
+  }
+  return '';
+};
+
+const API_BASE = getApiBase();
+
 export default function App() {
   const [stalls, setStalls] = useState<FoodStall[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -24,7 +41,7 @@ export default function App() {
   useEffect(() => {
     const fetchMode = async () => {
       try {
-        const res = await fetch('/mode-config.json');
+        const res = await fetch(`${API_BASE}/mode-config.json`);
         if (res.ok) {
           const config = await res.json();
           if (config.mode) {
@@ -66,14 +83,14 @@ export default function App() {
   const fetchData = async () => {
     try {
       // Fetch stalls
-      const stallsRes = await fetch('/api/stalls');
+      const stallsRes = await fetch(`${API_BASE}/api/stalls`);
       if (stallsRes.ok) {
         const stallsData = await stallsRes.json();
         setStalls(stallsData);
       }
 
       // Fetch all orders
-      const ordersRes = await fetch('/api/orders');
+      const ordersRes = await fetch(`${API_BASE}/api/orders`);
       if (ordersRes.ok) {
         const ordersData = await ordersRes.json();
         setOrders(ordersData);
@@ -81,7 +98,7 @@ export default function App() {
 
       // Sync active student profile if loaded
       if (activeStudent) {
-        const studentRes = await fetch(`/api/students/${activeStudent.registrationNumber}`);
+        const studentRes = await fetch(`${API_BASE}/api/students/${activeStudent.registrationNumber}`);
         if (studentRes.ok) {
           const studentData = await studentRes.json();
           setActiveStudent(studentData);
@@ -91,7 +108,7 @@ export default function App() {
         }
       } else {
         // Pre-fetch preset Vignesh profile on start
-        const studentRes = await fetch(`/api/students/12201948`);
+        const studentRes = await fetch(`${API_BASE}/api/students/12201948`);
         if (studentRes.ok) {
           const studentData = await studentRes.json();
           setActiveStudent(studentData);
@@ -117,7 +134,7 @@ export default function App() {
   // Handle active student profile switches
   const handleStudentChange = async (regNum: string) => {
     try {
-      const res = await fetch(`/api/students/${regNum}`);
+      const res = await fetch(`${API_BASE}/api/students/${regNum}`);
       if (res.ok) {
         const studentData = await res.json();
         setActiveStudent(studentData);
@@ -133,7 +150,7 @@ export default function App() {
   // Register a new student profile
   const handleRegisterStudent = async (reg: string, name: string, phone: string) => {
     try {
-      const res = await fetch('/api/students', {
+      const res = await fetch(`${API_BASE}/api/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ registrationNumber: reg, name, phone })
@@ -153,7 +170,7 @@ export default function App() {
   const handleAddBalance = async (amount: number) => {
     if (!activeStudent) return;
     try {
-      const res = await fetch('/api/students/balance', {
+      const res = await fetch(`${API_BASE}/api/students/balance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ registrationNumber: activeStudent.registrationNumber, amount })
@@ -171,7 +188,7 @@ export default function App() {
   // Admin updates order status
   const handleUpdateOrderStatus = async (orderId: string, status: OrderStatus) => {
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await fetch(`${API_BASE}/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
@@ -195,7 +212,7 @@ export default function App() {
     const updatedItem = { ...item, inventory: stock, isAvailable: stock > 0 };
 
     try {
-      const res = await fetch('/api/stalls/items', {
+      const res = await fetch(`${API_BASE}/api/stalls/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stallId, item: updatedItem })
@@ -211,7 +228,7 @@ export default function App() {
   // Admin adds a brand new menu item to a stall
   const handleAddItem = async (stallId: string, itemData: any) => {
     try {
-      const res = await fetch('/api/stalls/items', {
+      const res = await fetch(`${API_BASE}/api/stalls/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stallId, item: itemData })
@@ -227,7 +244,7 @@ export default function App() {
   // Admin deletes a menu item
   const handleDeleteItem = async (stallId: string, itemId: string) => {
     try {
-      const res = await fetch(`/api/stalls/items/${stallId}/${itemId}`, {
+      const res = await fetch(`${API_BASE}/api/stalls/items/${stallId}/${itemId}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -249,7 +266,7 @@ export default function App() {
 
   const handleCheckoutSuccess = async (txnId: string) => {
     try {
-      const res = await fetch('/api/pay', {
+      const res = await fetch(`${API_BASE}/api/pay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: checkoutOrderId, paymentMethod: checkoutMethod })

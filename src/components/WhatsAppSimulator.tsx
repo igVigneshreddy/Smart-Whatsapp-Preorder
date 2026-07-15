@@ -2,6 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Phone, Video, MoreVertical, CheckCheck, Landmark, PlusCircle, Search, UserCheck, MessageSquare, Mic, HelpCircle, FileText, ChevronRight, Check, Clock, ShieldCheck } from 'lucide-react';
 import { ChatMessage, StudentProfile, FoodStall, Order } from '../types';
 
+// Helper to determine the API Base URL
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const isCapacitor = (window as any).Capacitor?.isNativePlatform;
+    if (isCapacitor) {
+      return 'http://10.0.2.2:3000';
+    }
+  }
+  return '';
+};
+
+const API_BASE = getApiBase();
+
 interface WhatsAppSimulatorProps {
   stalls: FoodStall[];
   orders: Order[];
@@ -143,7 +156,7 @@ export default function WhatsAppSimulator({
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

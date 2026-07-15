@@ -862,24 +862,17 @@ const createOrderDeclaration = {
   }
 };
 
-// AI Chatbot Integration Endpoint using the GoogleGenAI SDK
-app.post("/api/chat", async (req, res) => {
-  const { message, registrationNumber, history } = req.body;
-  if (!message) {
-    return res.status(400).json({ error: "Message is required" });
-  }
+// Shared helper function to handle chat sessions for both Simulator and Twilio WhatsApp Bot
+const twilioSessionRegNums: { [phone: string]: string } = {};
+const twilioChatHistory: { [phone: string]: { sender: 'student' | 'chatbot'; text: string }[] } = {};
 
-  // Intercept json responses to log the chatbot reply automatically
-  const originalJson = res.json.bind(res);
-  res.json = (body: any) => {
-    if (body && body.reply) {
-      logChatMessage(registrationNumber, 'chatbot', body.reply, body.metadata);
-    }
-    return originalJson(body);
-  };
-
-  // Log student's incoming message
-  logChatMessage(registrationNumber, 'student', message);
+async function handleChatInput(
+  message: string,
+  registrationNumber: string | null,
+  history: any[]
+): Promise<{ reply: string; metadata?: any; error?: string }> {
+  // Log student's incoming message in database chats
+  logChatMessage(registrationNumber || "guest", 'student', message);
 
   const cleanMessage = message.trim().toLowerCase();
   const dbState = getDBState();
@@ -939,7 +932,7 @@ app.post("/api/chat", async (req, res) => {
     
     let matchedItem: any = null;
     let matchedStall: any = null;
-
+    
     for (const stall of dbState.stalls) {
       const item = stall.menu.find(m => m.name.toLowerCase() === targetItemName || targetItemName.includes(m.name.toLowerCase()));
       if (item) {
@@ -1016,10 +1009,8 @@ app.post("/api/chat", async (req, res) => {
   }
 
   if (instantReply) {
-    return res.json({
-      reply: instantReply,
-      metadata: instantMetadata
-    });
+    logChatMessage(registrationNumber || "guest", 'chatbot', instantReply, instantMetadata);
+    return { reply: instantReply, metadata: instantMetadata };
   }
 
   try {
@@ -1122,9 +1113,9 @@ Keep the tone energetic, helpful, and focused on helping students bypass long li
         const student = state.students.find(s => s.registrationNumber === registrationNumber);
 
         if (!student) {
-          return res.json({
-            reply: `⚠️ *Account Registration Required*\n\nPlease log in or provide your University Registration Number first (e.g., *12201948*) before pre-booking items!`,
-          });
+          const replyText = `⚠️ *Account Registration Required*\n\nPlease log in or provide your University Registration Number first (e.g., *12201948*) before pre-booking items!`;
+          logChatMessage(registrationNumber || "guest", 'chatbot', replyText);
+          return { reply: replyText };
         }
 
         if (stall) {
@@ -1148,10 +1139,10 @@ Keep the tone energetic, helpful, and focused on helping students bypass long li
           }
 
           if (stockError || orderItems.length === 0) {
-            return res.json({
-              reply: `⚠️ *Stock Alert!* Some items in your selection are currently out of stock or unavailable. Please view the digital menu to select another item!`,
-              metadata: { type: 'menu', data: state.stalls }
-            });
+            const replyText = `⚠️ *Stock Alert!* Some items in your selection are currently out of stock or unavailable. Please view the digital menu to select another item!`;
+            const metadata = { type: 'menu', data: state.stalls };
+            logChatMessage(registrationNumber || "guest", 'chatbot', replyText, metadata);
+            return { reply: replyText, metadata };
           }
 
           let paymentStatus: 'Pending' | 'Paid' = 'Pending';
@@ -1191,7 +1182,7 @@ Keep the tone energetic, helpful, and focused on helping students bypass long li
             id: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
             stallId,
             stallName: stall.name,
-            registrationNumber,
+            registrationNumber: registrationNumber!,
             items: orderItems,
             totalAmount,
             pickupTime,
@@ -1215,19 +1206,17 @@ Keep the tone energetic, helpful, and focused on helping students bypass long li
             replyText = `📋 *Pre-Booking Order Created! (Payment Pending)* \n\nYour pre-booking *${newOrder.id}* is reserved. Please pay *₹${totalAmount}* to send the order to the kitchen:\n\n🍱 *Stall:* ${stall.name}\n🍛 *Items:* \n${orderItems.map(it => `- ${it.name} x${it.quantity}`).join('\n')}\n💰 *Amount:* ₹${totalAmount}\n\nTap the button below to complete secure checkout!`;
           }
 
-          return res.json({
-            reply: replyText,
-            metadata: {
-              type: 'order_summary',
-              data: newOrder
-            }
-          });
+          const metadata = {
+            type: 'order_summary',
+            data: newOrder
+          };
+          logChatMessage(registrationNumber || "guest", 'chatbot', replyText, metadata);
+          return { reply: replyText, metadata };
         }
       }
     }
 
     const aiText = response.text || "I apologize, I'm having trouble processing that request right now. Please select an option from our menu!";
-
     let metadata: any = undefined;
     const lowerText = aiText.toLowerCase();
 
@@ -1259,19 +1248,101 @@ Keep the tone energetic, helpful, and focused on helping students bypass long li
       }
     }
 
-    res.json({
-      reply: aiText,
-      metadata
-    });
+    logChatMessage(registrationNumber || "guest", 'chatbot', aiText, metadata);
+    return { reply: aiText, metadata };
 
   } catch (error: any) {
-    console.error("Gemini API error in /api/chat:", error);
-    // Graceful fallback with clear instructions if key is missing or invalid
-    res.json({
-      reply: `⚠️ *Assistant Status: Offline mode*\n\nI am currently operating in offline mode because the Gemini API Key is not configured yet. \n\n*How to enable the AI Chatbot:*\nGo to the **Settings > Secrets** panel in AI Studio and make sure your \`GEMINI_API_KEY\` is provided! \n\nIn the meantime, you can use the quick-actions buttons or manually simulate food bookings from the web dashboard panel!`,
-      error: error.message
-    });
+    console.error("Gemini API error in handleChatInput:", error);
+    const replyText = `⚠️ *Assistant Status: Offline mode*\n\nI am currently operating in offline mode because the Gemini API Key is not configured yet. \n\n*How to enable the AI Chatbot:*\nGo to the **Settings > Secrets** panel in AI Studio and make sure your \`GEMINI_API_KEY\` is provided! \n\nIn the meantime, you can use the quick-actions buttons or manually simulate food bookings from the web dashboard panel!`;
+    logChatMessage(registrationNumber || "guest", 'chatbot', replyText);
+    return { reply: replyText, error: error.message };
   }
+}
+
+// 1. Web Simulator Chat API (uses the handleChatInput helper)
+app.post("/api/chat", async (req, res) => {
+  const { message, registrationNumber, history } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  const result = await handleChatInput(message, registrationNumber, history);
+  res.json(result);
+});
+
+// 2. Twilio WhatsApp Webhook Gateway Endpoint
+app.post("/webhook/twilio", express.urlencoded({ extended: false }), async (req, res) => {
+  const incomingNumber = req.body.From; // e.g., "whatsapp:+919876543210"
+  const messageText = req.body.Body; // e.g., "12201948" or "menu"
+
+  if (!incomingNumber || !messageText) {
+    res.type('text/xml');
+    res.send(`<Response><Message>⚠️ Invalid Webhook Request: Missing parameters.</Message></Response>`);
+    return;
+  }
+
+  // Normalize phone number to digits only (e.g., "919876543210")
+  const rawPhone = incomingNumber.replace("whatsapp:", "").replace(/\D/g, "");
+
+  const dbState = getDBState();
+  let regNum = twilioSessionRegNums[rawPhone] || "";
+
+  // A. Link student profile phone number by matching 8-digit registration input
+  const regMatch = messageText.trim().match(/^\d{8}$/);
+  if (regMatch) {
+    const targetReg = regMatch[0];
+    const student = dbState.students.find(s => s.registrationNumber === targetReg);
+    if (student) {
+      // Link the phone number to this student profile in the database
+      student.phone = "+" + rawPhone;
+      saveDBState(dbState);
+      twilioSessionRegNums[rawPhone] = targetReg;
+
+      res.type('text/xml');
+      res.send(`
+        <Response>
+          <Message>✅ *WhatsApp Account Linked Successfully!*\n\nHello *${student.name}*, your WhatsApp is now linked to your student profile (Reg: *${targetReg}*).\n\nYour balance is *₹${student.balance}*. You can now browse menus and pre-book meals directly from here! Try typing *menu*.</Message>
+        </Response>
+      `);
+      return;
+    }
+  }
+
+  // B. Look up registration number in db.json if not in session cache
+  if (!regNum && dbState.students) {
+    const student = dbState.students.find(s => {
+      const cleanDbPhone = s.phone.replace(/\D/g, "");
+      return rawPhone.endsWith(cleanDbPhone);
+    });
+    if (student) {
+      regNum = student.registrationNumber;
+      twilioSessionRegNums[rawPhone] = regNum;
+    }
+  }
+
+  // C. Process chatbot message using the shared helper
+  const history = twilioChatHistory[rawPhone] || [];
+  const result = await handleChatInput(messageText, regNum || null, history);
+
+  // Update history session
+  if (!twilioChatHistory[rawPhone]) {
+    twilioChatHistory[rawPhone] = [];
+  }
+  twilioChatHistory[rawPhone].push({ sender: 'student', text: messageText });
+  twilioChatHistory[rawPhone].push({ sender: 'chatbot', text: result.reply });
+
+  // Cap history at 10 items
+  if (twilioChatHistory[rawPhone].length > 10) {
+    twilioChatHistory[rawPhone] = twilioChatHistory[rawPhone].slice(-10);
+  }
+
+  // Respond with TwiML XML
+  res.type('text/xml');
+  res.send(`
+    <Response>
+      <Message>${result.reply}</Message>
+    </Response>
+  `);
 });
 
 // Setup Vite Dev server or Serve build in production
