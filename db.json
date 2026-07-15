@@ -200,7 +200,7 @@
           "price": 80,
           "category": "Beverages",
           "description": "Freshly cold-pressed juice from spinach, celery, green apple, cucumber, mint, and lemon.",
-          "inventory": 20,
+          "inventory": 19,
           "popularity": 4.2,
           "isAvailable": true
         }
@@ -208,6 +208,30 @@
     }
   ],
   "orders": [
+    {
+      "id": "ORD-58974",
+      "stallId": "stall-4",
+      "stallName": "Green Bowl",
+      "registrationNumber": "12201948",
+      "items": [
+        {
+          "itemId": "item-403",
+          "name": "Detox Green Juice",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 80,
+      "pickupTime": "1:00 PM",
+      "pickupDate": "2026-07-15",
+      "status": "Collected",
+      "estimatedReadyTime": "12:50 PM",
+      "createdAt": "2026-07-15T09:33:17.537Z",
+      "paymentStatus": "Paid",
+      "paymentMethod": "Wallet",
+      "transactionId": "TXN-WAL-74461",
+      "waitingTimeEstimation": 8
+    },
     {
       "id": "ORD-73133",
       "stallId": "stall-3",
@@ -364,7 +388,7 @@
       "registrationNumber": "12201948",
       "name": "Vignesh Reddy",
       "phone": "+91 9876543210",
-      "balance": 170
+      "balance": 90
     },
     {
       "registrationNumber": "12202025",
@@ -3026,9 +3050,271 @@
               "waitingTimeEstimation": 5
             }
           }
+        },
+        {
+          "id": "student-1784107992970-151",
+          "sender": "student",
+          "text": "1",
+          "timestamp": "03:03 pm"
+        },
+        {
+          "id": "chatbot-1784107993151-975",
+          "sender": "chatbot",
+          "text": "🍔 *Choose a Food Stall to Pre-book from:* \n\n*1.* *Spice Junction* (Prep time: ~15 mins)\n   _Specialty:_ North Indian & Mughlai\n\n*2.* *The Burger Club* (Prep time: ~10 mins)\n   _Specialty:_ Fast Food & Burgers\n\n*3.* *Café Delights* (Prep time: ~5 mins)\n   _Specialty:_ Beverages & Desserts\n\n*4.* *Green Bowl* (Prep time: ~8 mins)\n   _Specialty:_ Salads & Healthy Food\n\nSimply reply with the food item name (e.g., *Veg Burger* or *Chole Bhature*) that you want to pre-book!",
+          "timestamp": "03:03 pm",
+          "metadata": {
+            "type": "menu",
+            "data": [
+              {
+                "id": "stall-1",
+                "name": "Spice Junction",
+                "cuisine": "North Indian & Mughlai",
+                "rating": 4.6,
+                "preparationTimeEst": 15,
+                "busySlots": [
+                  "12:00 PM",
+                  "12:30 PM",
+                  "1:00 PM"
+                ],
+                "menu": [
+                  {
+                    "id": "item-101",
+                    "name": "Veg Biryani",
+                    "price": 120,
+                    "category": "Rice",
+                    "description": "Fragrant basmati rice cooked with saffron, fresh vegetables, and mint, served with raita.",
+                    "inventory": 15,
+                    "popularity": 4.5,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-102",
+                    "name": "Butter Chicken & Naan",
+                    "price": 180,
+                    "category": "Curry",
+                    "description": "Tender roasted chicken cooked in creamy, spiced tomato butter gravy, served with fresh garlic naan.",
+                    "inventory": 10,
+                    "popularity": 4.9,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-103",
+                    "name": "Paneer Butter Masala",
+                    "price": 150,
+                    "category": "Curry",
+                    "description": "Soft cottage cheese cubes in rich cashew-tomato onion gravy with cream.",
+                    "inventory": 12,
+                    "popularity": 4.4,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-104",
+                    "name": "Samosa (2 pcs)",
+                    "price": 40,
+                    "category": "Snacks",
+                    "description": "Crispy fried puff pastries stuffed with mildly spiced potato and peas filler.",
+                    "inventory": 30,
+                    "popularity": 4.2,
+                    "isAvailable": true
+                  }
+                ]
+              },
+              {
+                "id": "stall-2",
+                "name": "The Burger Club",
+                "cuisine": "Fast Food & Burgers",
+                "rating": 4.4,
+                "preparationTimeEst": 10,
+                "busySlots": [
+                  "1:00 PM",
+                  "1:30 PM",
+                  "4:30 PM"
+                ],
+                "menu": [
+                  {
+                    "id": "item-201",
+                    "name": "Veg Burger",
+                    "price": 80,
+                    "category": "Burgers",
+                    "description": "Crispy veggie patty with lettuce, tomatoes, onions, and melted cheese, topped with custom club sauce.",
+                    "inventory": 19,
+                    "popularity": 4.7,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-202",
+                    "name": "Cheese Burger",
+                    "price": 110,
+                    "category": "Burgers",
+                    "description": "Premium vegetable patty loaded with double cheddar cheese slices, spicy jalapenos, and direct mustard garlic aioli.",
+                    "inventory": 15,
+                    "popularity": 4.5,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-203",
+                    "name": "Chicken Club Burger",
+                    "price": 130,
+                    "category": "Burgers",
+                    "description": "Crumb-fried chicken patty with cheese, tomato, and sweet-chili mayonnaise.",
+                    "inventory": 12,
+                    "popularity": 4.6,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-204",
+                    "name": "French Fries",
+                    "price": 60,
+                    "category": "Snacks",
+                    "description": "Salted golden french fries, crispy on the outside and fluffy on the inside.",
+                    "inventory": 25,
+                    "popularity": 4.3,
+                    "isAvailable": true
+                  }
+                ]
+              },
+              {
+                "id": "stall-3",
+                "name": "Café Delights",
+                "cuisine": "Beverages & Desserts",
+                "rating": 4.5,
+                "preparationTimeEst": 5,
+                "busySlots": [
+                  "12:30 PM",
+                  "1:00 PM",
+                  "3:30 PM",
+                  "4:00 PM"
+                ],
+                "menu": [
+                  {
+                    "id": "item-301",
+                    "name": "Cold Coffee",
+                    "price": 70,
+                    "category": "Beverages",
+                    "description": "Thick whipped cold coffee made with rich roast espresso and cold milk, topped with chocolate syrup.",
+                    "inventory": 25,
+                    "popularity": 4.8,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-302",
+                    "name": "Masala Chai",
+                    "price": 20,
+                    "category": "Beverages",
+                    "description": "Freshly brewed hot tea with milk, fresh ginger, cardamom, clove, and cinnamon.",
+                    "inventory": 39,
+                    "popularity": 4.9,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-303",
+                    "name": "Chocolate Brownie",
+                    "price": 90,
+                    "category": "Dessert",
+                    "description": "Fudgy, dense chocolate brownie served warm with chocolate sauce glaze.",
+                    "inventory": 12,
+                    "popularity": 4.6,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-304",
+                    "name": "Paneer Patty Puff",
+                    "price": 45,
+                    "category": "Snacks",
+                    "description": "Flaky puff pastry filled with delicious spicy cottage cheese scrambles.",
+                    "inventory": 15,
+                    "popularity": 4.1,
+                    "isAvailable": true
+                  }
+                ]
+              },
+              {
+                "id": "stall-4",
+                "name": "Green Bowl",
+                "cuisine": "Salads & Healthy Food",
+                "rating": 4.7,
+                "preparationTimeEst": 8,
+                "busySlots": [
+                  "12:00 PM",
+                  "1:00 PM"
+                ],
+                "menu": [
+                  {
+                    "id": "item-401",
+                    "name": "Paneer Salad",
+                    "price": 130,
+                    "category": "Salads",
+                    "description": "High protein fresh salad made of grilled herbed paneer, cucumber, tomatoes, bell peppers, olives, and vinaigrette.",
+                    "inventory": 9,
+                    "popularity": 4.4,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-402",
+                    "name": "Fruit Platter",
+                    "price": 100,
+                    "category": "Fruits",
+                    "description": "Freshly chopped seasonal fruits including pineapple, papaya, watermelon, apple, kiwi, and pomegranate seeds.",
+                    "inventory": 14,
+                    "popularity": 4.5,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "item-403",
+                    "name": "Detox Green Juice",
+                    "price": 80,
+                    "category": "Beverages",
+                    "description": "Freshly cold-pressed juice from spinach, celery, green apple, cucumber, mint, and lemon.",
+                    "inventory": 20,
+                    "popularity": 4.2,
+                    "isAvailable": true
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "student-1784107997521-207",
+          "sender": "student",
+          "text": "I want to pre-book a Detox Green Juice",
+          "timestamp": "03:03 pm"
+        },
+        {
+          "id": "chatbot-1784107997550-170",
+          "sender": "chatbot",
+          "text": "🎉 *Pre-Booking Confirmed Instantly!* \n\nYour order *ORD-58974* has been placed successfully!\n\n🍱 *Stall:* Green Bowl\n🍛 *Item:* Detox Green Juice x1\n💰 *Total:* ₹80 (Paid via LPU Student Wallet)\n⏰ *Estimated Ready Time:* 12:50 PM (Wait: ~8 mins)\n\nNo lines for you! The canteen operator has received your order on their screen and is preparing it for your pickup slot.",
+          "timestamp": "03:03 pm",
+          "metadata": {
+            "type": "order_summary",
+            "data": {
+              "id": "ORD-58974",
+              "stallId": "stall-4",
+              "stallName": "Green Bowl",
+              "registrationNumber": "12201948",
+              "items": [
+                {
+                  "itemId": "item-403",
+                  "name": "Detox Green Juice",
+                  "price": 80,
+                  "quantity": 1
+                }
+              ],
+              "totalAmount": 80,
+              "pickupTime": "1:00 PM",
+              "pickupDate": "2026-07-15",
+              "status": "Pending",
+              "estimatedReadyTime": "12:50 PM",
+              "createdAt": "2026-07-15T09:33:17.537Z",
+              "paymentStatus": "Paid",
+              "paymentMethod": "Wallet",
+              "transactionId": "TXN-WAL-74461",
+              "waitingTimeEstimation": 8
+            }
+          }
         }
       ],
-      "lastMessageAt": "2026-07-15T05:11:54.684Z"
+      "lastMessageAt": "2026-07-15T09:33:17.551Z"
     }
   ]
 }

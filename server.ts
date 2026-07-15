@@ -1278,6 +1278,8 @@ app.post("/webhook/twilio", express.urlencoded({ extended: false }), async (req,
   const incomingNumber = req.body.From; // e.g., "whatsapp:+919876543210"
   const messageText = req.body.Body; // e.g., "12201948" or "menu"
 
+  console.log(`[Twilio Webhook] Received WhatsApp message from ${incomingNumber}: "${messageText}"`);
+
   if (!incomingNumber || !messageText) {
     res.type('text/xml');
     res.send(`<Response><Message>⚠️ Invalid Webhook Request: Missing parameters.</Message></Response>`);

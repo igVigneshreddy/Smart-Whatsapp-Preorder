@@ -1,5 +1,5 @@
 -- MySQL Backup Dump
--- Generated at: 2026-07-15T05:12:21.738Z
+-- Generated at: 2026-07-15T09:33:31.185Z
 
 CREATE DATABASE IF NOT EXISTS campus_food_prebooking;
 USE campus_food_prebooking;
@@ -99,14 +99,16 @@ INSERT INTO menu_items (id, stall_id, name, price, category, description, invent
 INSERT INTO menu_items (id, stall_id, name, price, category, description, inventory, popularity, is_available) VALUES ('item-304', 'stall-3', 'Paneer Patty Puff', 45, 'Snacks', 'Flaky puff pastry filled with delicious spicy cottage cheese scrambles.', 15, 4.1, 1);
 INSERT INTO menu_items (id, stall_id, name, price, category, description, inventory, popularity, is_available) VALUES ('item-401', 'stall-4', 'Paneer Salad', 130, 'Salads', 'High protein fresh salad made of grilled herbed paneer, cucumber, tomatoes, bell peppers, olives, and vinaigrette.', 9, 4.4, 1);
 INSERT INTO menu_items (id, stall_id, name, price, category, description, inventory, popularity, is_available) VALUES ('item-402', 'stall-4', 'Fruit Platter', 100, 'Fruits', 'Freshly chopped seasonal fruits including pineapple, papaya, watermelon, apple, kiwi, and pomegranate seeds.', 14, 4.5, 1);
-INSERT INTO menu_items (id, stall_id, name, price, category, description, inventory, popularity, is_available) VALUES ('item-403', 'stall-4', 'Detox Green Juice', 80, 'Beverages', 'Freshly cold-pressed juice from spinach, celery, green apple, cucumber, mint, and lemon.', 20, 4.2, 1);
+INSERT INTO menu_items (id, stall_id, name, price, category, description, inventory, popularity, is_available) VALUES ('item-403', 'stall-4', 'Detox Green Juice', 80, 'Beverages', 'Freshly cold-pressed juice from spinach, celery, green apple, cucumber, mint, and lemon.', 19, 4.2, 1);
 
 -- Inserting students
-INSERT INTO students (registration_number, name, phone, balance) VALUES ('12201948', 'Vignesh Reddy', '+91 9876543210', 170);
+INSERT INTO students (registration_number, name, phone, balance) VALUES ('12201948', 'Vignesh Reddy', '+91 9876543210', 90);
 INSERT INTO students (registration_number, name, phone, balance) VALUES ('12202025', 'Aarav Sharma', '+91 9123456789', 150);
 INSERT INTO students (registration_number, name, phone, balance) VALUES ('12204432', 'Priya Patel', '+91 8877665544', 75);
 
 -- Inserting orders and order items
+INSERT INTO orders (id, stall_id, stall_name, registration_number, total_amount, pickup_time, pickup_date, status, estimated_ready_time, created_at, payment_status, payment_method, transaction_id, waiting_time_estimation) VALUES ('ORD-58974', 'stall-4', 'Green Bowl', '12201948', 80, '1:00 PM', '2026-07-15', 'Collected', '12:50 PM', '2026-07-15T09:33:17.537Z', 'Paid', 'Wallet', 'TXN-WAL-74461', 8);
+INSERT INTO order_items (order_id, item_id, name, price, quantity) VALUES ('ORD-58974', 'item-403', 'Detox Green Juice', 80, 1);
 INSERT INTO orders (id, stall_id, stall_name, registration_number, total_amount, pickup_time, pickup_date, status, estimated_ready_time, created_at, payment_status, payment_method, transaction_id, waiting_time_estimation) VALUES ('ORD-73133', 'stall-3', 'Café Delights', '12201948', 20, '1:00 PM', '2026-07-15', 'Collected', '12:50 PM', '2026-07-15T05:11:54.671Z', 'Paid', 'Wallet', 'TXN-WAL-81134', 5);
 INSERT INTO order_items (order_id, item_id, name, price, quantity) VALUES ('ORD-73133', 'item-302', 'Masala Chai', 20, 1);
 INSERT INTO orders (id, stall_id, stall_name, registration_number, total_amount, pickup_time, pickup_date, status, estimated_ready_time, created_at, payment_status, payment_method, transaction_id, waiting_time_estimation) VALUES ('ORD-45842', 'stall-4', 'Green Bowl', '12201948', 130, '1:00 PM', '2026-07-15', 'Collected', '12:50 PM', '2026-07-15T05:10:36.502Z', 'Paid', 'Wallet', 'TXN-WAL-14211', 10);
@@ -351,4 +353,31 @@ Your order *ORD-73133* has been placed successfully!
 ⏰ *Estimated Ready Time:* 12:50 PM (Wait: ~5 mins)
 
 No lines for you! The canteen operator has received your order on their screen and is preparing it for your pickup slot.', '10:41 am', '{"type":"order_summary","data":{"id":"ORD-73133","stallId":"stall-3","stallName":"Café Delights","registrationNumber":"12201948","items":[{"itemId":"item-302","name":"Masala Chai","price":20,"quantity":1}],"totalAmount":20,"pickupTime":"1:00 PM","pickupDate":"2026-07-15","status":"Pending","estimatedReadyTime":"12:50 PM","createdAt":"2026-07-15T05:11:54.671Z","paymentStatus":"Paid","paymentMethod":"Wallet","transactionId":"TXN-WAL-81134","waitingTimeEstimation":5}}');
+INSERT INTO chat_messages (id, registration_number, sender, text, timestamp, metadata) VALUES ('student-1784107992970-151', '12201948', 'student', '1', '03:03 pm', '');
+INSERT INTO chat_messages (id, registration_number, sender, text, timestamp, metadata) VALUES ('chatbot-1784107993151-975', '12201948', 'chatbot', '🍔 *Choose a Food Stall to Pre-book from:* 
+
+*1.* *Spice Junction* (Prep time: ~15 mins)
+   _Specialty:_ North Indian & Mughlai
+
+*2.* *The Burger Club* (Prep time: ~10 mins)
+   _Specialty:_ Fast Food & Burgers
+
+*3.* *Café Delights* (Prep time: ~5 mins)
+   _Specialty:_ Beverages & Desserts
+
+*4.* *Green Bowl* (Prep time: ~8 mins)
+   _Specialty:_ Salads & Healthy Food
+
+Simply reply with the food item name (e.g., *Veg Burger* or *Chole Bhature*) that you want to pre-book!', '03:03 pm', '{"type":"menu","data":[{"id":"stall-1","name":"Spice Junction","cuisine":"North Indian & Mughlai","rating":4.6,"preparationTimeEst":15,"busySlots":["12:00 PM","12:30 PM","1:00 PM"],"menu":[{"id":"item-101","name":"Veg Biryani","price":120,"category":"Rice","description":"Fragrant basmati rice cooked with saffron, fresh vegetables, and mint, served with raita.","inventory":15,"popularity":4.5,"isAvailable":true},{"id":"item-102","name":"Butter Chicken & Naan","price":180,"category":"Curry","description":"Tender roasted chicken cooked in creamy, spiced tomato butter gravy, served with fresh garlic naan.","inventory":10,"popularity":4.9,"isAvailable":true},{"id":"item-103","name":"Paneer Butter Masala","price":150,"category":"Curry","description":"Soft cottage cheese cubes in rich cashew-tomato onion gravy with cream.","inventory":12,"popularity":4.4,"isAvailable":true},{"id":"item-104","name":"Samosa (2 pcs)","price":40,"category":"Snacks","description":"Crispy fried puff pastries stuffed with mildly spiced potato and peas filler.","inventory":30,"popularity":4.2,"isAvailable":true}]},{"id":"stall-2","name":"The Burger Club","cuisine":"Fast Food & Burgers","rating":4.4,"preparationTimeEst":10,"busySlots":["1:00 PM","1:30 PM","4:30 PM"],"menu":[{"id":"item-201","name":"Veg Burger","price":80,"category":"Burgers","description":"Crispy veggie patty with lettuce, tomatoes, onions, and melted cheese, topped with custom club sauce.","inventory":19,"popularity":4.7,"isAvailable":true},{"id":"item-202","name":"Cheese Burger","price":110,"category":"Burgers","description":"Premium vegetable patty loaded with double cheddar cheese slices, spicy jalapenos, and direct mustard garlic aioli.","inventory":15,"popularity":4.5,"isAvailable":true},{"id":"item-203","name":"Chicken Club Burger","price":130,"category":"Burgers","description":"Crumb-fried chicken patty with cheese, tomato, and sweet-chili mayonnaise.","inventory":12,"popularity":4.6,"isAvailable":true},{"id":"item-204","name":"French Fries","price":60,"category":"Snacks","description":"Salted golden french fries, crispy on the outside and fluffy on the inside.","inventory":25,"popularity":4.3,"isAvailable":true}]},{"id":"stall-3","name":"Café Delights","cuisine":"Beverages & Desserts","rating":4.5,"preparationTimeEst":5,"busySlots":["12:30 PM","1:00 PM","3:30 PM","4:00 PM"],"menu":[{"id":"item-301","name":"Cold Coffee","price":70,"category":"Beverages","description":"Thick whipped cold coffee made with rich roast espresso and cold milk, topped with chocolate syrup.","inventory":25,"popularity":4.8,"isAvailable":true},{"id":"item-302","name":"Masala Chai","price":20,"category":"Beverages","description":"Freshly brewed hot tea with milk, fresh ginger, cardamom, clove, and cinnamon.","inventory":39,"popularity":4.9,"isAvailable":true},{"id":"item-303","name":"Chocolate Brownie","price":90,"category":"Dessert","description":"Fudgy, dense chocolate brownie served warm with chocolate sauce glaze.","inventory":12,"popularity":4.6,"isAvailable":true},{"id":"item-304","name":"Paneer Patty Puff","price":45,"category":"Snacks","description":"Flaky puff pastry filled with delicious spicy cottage cheese scrambles.","inventory":15,"popularity":4.1,"isAvailable":true}]},{"id":"stall-4","name":"Green Bowl","cuisine":"Salads & Healthy Food","rating":4.7,"preparationTimeEst":8,"busySlots":["12:00 PM","1:00 PM"],"menu":[{"id":"item-401","name":"Paneer Salad","price":130,"category":"Salads","description":"High protein fresh salad made of grilled herbed paneer, cucumber, tomatoes, bell peppers, olives, and vinaigrette.","inventory":9,"popularity":4.4,"isAvailable":true},{"id":"item-402","name":"Fruit Platter","price":100,"category":"Fruits","description":"Freshly chopped seasonal fruits including pineapple, papaya, watermelon, apple, kiwi, and pomegranate seeds.","inventory":14,"popularity":4.5,"isAvailable":true},{"id":"item-403","name":"Detox Green Juice","price":80,"category":"Beverages","description":"Freshly cold-pressed juice from spinach, celery, green apple, cucumber, mint, and lemon.","inventory":20,"popularity":4.2,"isAvailable":true}]}]}');
+INSERT INTO chat_messages (id, registration_number, sender, text, timestamp, metadata) VALUES ('student-1784107997521-207', '12201948', 'student', 'I want to pre-book a Detox Green Juice', '03:03 pm', '');
+INSERT INTO chat_messages (id, registration_number, sender, text, timestamp, metadata) VALUES ('chatbot-1784107997550-170', '12201948', 'chatbot', '🎉 *Pre-Booking Confirmed Instantly!* 
+
+Your order *ORD-58974* has been placed successfully!
+
+🍱 *Stall:* Green Bowl
+🍛 *Item:* Detox Green Juice x1
+💰 *Total:* ₹80 (Paid via LPU Student Wallet)
+⏰ *Estimated Ready Time:* 12:50 PM (Wait: ~8 mins)
+
+No lines for you! The canteen operator has received your order on their screen and is preparing it for your pickup slot.', '03:03 pm', '{"type":"order_summary","data":{"id":"ORD-58974","stallId":"stall-4","stallName":"Green Bowl","registrationNumber":"12201948","items":[{"itemId":"item-403","name":"Detox Green Juice","price":80,"quantity":1}],"totalAmount":80,"pickupTime":"1:00 PM","pickupDate":"2026-07-15","status":"Pending","estimatedReadyTime":"12:50 PM","createdAt":"2026-07-15T09:33:17.537Z","paymentStatus":"Paid","paymentMethod":"Wallet","transactionId":"TXN-WAL-74461","waitingTimeEstimation":8}}');
 
