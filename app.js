@@ -227,6 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
       checkOrderStatusChanges();
     }
   });
+});
+
 // Theme Toggle Manager (Dark / Light Mode)
 function setupThemeToggle() {
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
