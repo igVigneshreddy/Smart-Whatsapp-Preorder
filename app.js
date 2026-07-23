@@ -1732,3 +1732,18 @@ function toggleItemStock(stallId, itemId) {
 function escapeHTML(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
+// Expose all interactive functions to window object for 100% reliable button click execution
+window.sendQuickOption = sendQuickOption;
+window.toggleVendorItemStock = toggleVendorItemStock;
+window.openVendorItemModal = openVendorItemModal;
+window.deleteVendorMenuItem = deleteVendorMenuItem;
+window.openPaymentModal = openPaymentModal;
+window.triggerAnimatedPaymentSuccess = triggerAnimatedPaymentSuccess;
+window.exportSalesReportCSV = exportSalesReportCSV;
+window.toggleItemStock = toggleItemStock;
+window.handleUserSendMessage = handleUserSendMessage;
+window.updateOrderStatus = updateOrderStatus;
+window.setVendorTimeframe = typeof setVendorTimeframe !== 'undefined' ? setVendorTimeframe : null;
+window.setAdminTimeframe = typeof setAdminTimeframe !== 'undefined' ? setAdminTimeframe : null;
+window.switchVendorTab = typeof switchVendorTab !== 'undefined' ? switchVendorTab : null;
