@@ -9,6 +9,7 @@ const defaultStalls = [
     vendorPass: 'pass123',
     upiId: 'nepaliswadh@lpu.upi',
     bankAccount: 'SBI - Acc #392810192 (Direct Vendor)',
+    qrImage: 'QR.jpeg',
     menu: [
       // Fries
       { id: 'ns_1', category: 'Fries', name: 'Salted Fries', price: 60, available: true },
@@ -95,6 +96,7 @@ const defaultStalls = [
     vendorPass: 'pass123',
     upiId: 'pakkaadda@lpu.upi',
     bankAccount: 'HDFC - Acc #918237461 (Direct Vendor)',
+    qrImage: 'QR.jpeg',
     menu: [
       // Noodles
       { id: 'pa_1', category: 'Noodles', name: 'Veg Noodles', price: 60, available: true },
@@ -137,15 +139,18 @@ const defaultStalls = [
   }
 ];
 
-// Always update local storage stalls if Excel menu structure changed
-localStorage.setItem('campus_stalls', JSON.stringify(defaultStalls));
-let stalls = defaultStalls;
+// Local Storage data loader
+let stalls = JSON.parse(localStorage.getItem('campus_stalls')) || defaultStalls;
 let orders = JSON.parse(localStorage.getItem('campus_orders')) || [];
 let currentVendor = JSON.parse(localStorage.getItem('current_vendor')) || null;
 
+// Timeframe Filter States
+let vendorTimeframe = 'daily';
+let adminTimeframe = 'daily';
+
 // Chatbot Flow State
 let chatState = {
-  step: 'IDLE', // IDLE, SELECT_STALL, SELECT_CATEGORY, SELECT_ITEMS, SELECT_SLOT
+  step: 'IDLE', // IDLE, SELECT_STALL, SELECT_CATEGORY, SELECT_ITEMS, SELECT_SLOT, CONFIRM_ORDER, AWAITING_PAYMENT
   selectedStall: null,
   selectedCategory: null,
   cartItems: [],
@@ -172,6 +177,18 @@ const vendorLogoutBtn = document.getElementById('vendor-logout-btn');
 const vendorOrdersTbody = document.getElementById('vendor-orders-tbody');
 const stallNameTitle = document.getElementById('stall-name-title');
 
+// Vendor Registration & QR Modals
+const openRegisterBtn = document.getElementById('open-register-btn');
+const vendorRegisterModal = document.getElementById('vendor-register-modal');
+const closeRegisterModalBtn = document.getElementById('close-register-modal-btn');
+const vendorRegisterForm = document.getElementById('vendor-register-form');
+
+const vendorQrSettingsBtn = document.getElementById('vendor-qr-settings-btn');
+const updateQrShortcutBtn = document.getElementById('update-qr-shortcut-btn');
+const vendorQrSettingsModal = document.getElementById('vendor-qr-settings-modal');
+const closeQrSettingsModalBtn = document.getElementById('close-qr-settings-modal-btn');
+const vendorQrSettingsForm = document.getElementById('vendor-qr-settings-form');
+
 // Admin DOM
 const adminMenuList = document.getElementById('admin-menu-list');
 const addItemBtn = document.getElementById('add-menu-item-btn');
@@ -179,6 +196,9 @@ const itemModal = document.getElementById('item-modal');
 const closeModalBtn = document.getElementById('close-modal-btn');
 const addItemForm = document.getElementById('add-item-form');
 const adminRevenue = document.getElementById('admin-revenue');
+const exportReportBtn = document.getElementById('export-report-btn');
+const studentSearchInput = document.getElementById('student-search-input');
+const studentSearchBtn = document.getElementById('student-search-btn');
 
 // Payment Modal DOM
 const paymentModal = document.getElementById('payment-modal');
@@ -190,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupViewNavigation();
   setupChatListeners();
   setupVendorListeners();
+  setupVendorModals();
   setupAdminListeners();
   setupPaymentModalListeners();
   renderVendorDashboard();
@@ -197,8 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for storage events across tabs
   window.addEventListener('storage', (e) => {
-    if (e.key === 'campus_orders') {
-      orders = JSON.parse(e.newValue || '[]');
+    if (e.key === 'campus_orders' || e.key === 'campus_stalls') {
+      orders = JSON.parse(localStorage.getItem('campus_orders') || '[]');
+      stalls = JSON.parse(localStorage.getItem('campus_stalls') || JSON.stringify(defaultStalls));
       renderVendorDashboard();
       renderAdminView();
       checkOrderStatusChanges();
@@ -216,6 +238,9 @@ function setupViewNavigation() {
 
       btn.classList.add('active');
       document.getElementById(targetView).classList.add('active');
+      
+      if (targetView === 'vendor-view') renderVendorDashboard();
+      if (targetView === 'admin-view') renderAdminView();
     });
   });
 }
@@ -228,10 +253,15 @@ function saveOrders() {
 
 function saveStalls() {
   localStorage.setItem('campus_stalls', JSON.stringify(stalls));
+  window.dispatchEvent(new Event('stallsUpdated'));
 }
 
 window.addEventListener('ordersUpdated', () => {
   renderVendorDashboard();
+  renderAdminView();
+});
+
+window.addEventListener('stallsUpdated', () => {
   renderAdminView();
 });
 
@@ -643,30 +673,31 @@ function renderOrderConfirmationStep() {
   ]);
 }
 
-// Render Vendor Direct QR Payment with Laser Scanner Animation & Clickable UPI Link
+// Render Vendor Direct QR Payment with Vendor Specific QR Code & UPI Link
 function renderVendorQRPaymentCard() {
   const stall = chatState.selectedStall;
   const total = chatState.cartItems.reduce((acc, c) => acc + c.price, 0);
   const upiId = stall.upiId || 'nepaliswadh@lpu.upi';
+  const qrImgSrc = stall.qrImage || 'QR.jpeg';
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(stall.name)}&am=${total}&cu=INR&tn=${encodeURIComponent('PreOrder_' + stall.name)}`;
 
   const qrHtml = `
-    📱 <strong>Direct Vendor UPI Payment QR</strong><br>
+    📱 <strong>Direct Vendor UPI Payment QR (${stall.name})</strong><br>
     Scan with phone or <strong>click QR image / button below</strong> to pay via any UPI app:<br>
 
     <div class="qr-container-animated">
       <div class="qr-laser-scanner"></div>
       <a href="${upiDeepLink}" target="_blank" class="qr-click-wrapper" onclick="handleQRClickToPay(event)" title="Click to open GPay, PhonePe, Paytm, or BHIM">
-        <img src="QR.jpeg" alt="Vendor UPI QR Code" class="vendor-qr-img">
+        <img src="${qrImgSrc}" alt="${stall.name} Payment QR" class="vendor-qr-img">
       </a>
       <span class="qr-click-hint">
-        <i class="fa-solid fa-arrow-pointer"></i> Click QR to Open UPI App (GPay / PhonePe / Paytm)
+        <i class="fa-solid fa-arrow-pointer"></i> Click QR to Open UPI App (${stall.name})
       </span>
     </div>
 
     <div class="upi-apps-container">
       <a href="${upiDeepLink}" target="_blank" class="upi-app-btn pulse" onclick="handleQRClickToPay(event)">
-        <i class="fa-solid fa-mobile-screen-button"></i> Pay ₹${total} via UPI App Direct
+        <i class="fa-solid fa-mobile-screen-button"></i> Pay ₹${total} Directly to ${stall.name}
       </a>
       <div class="upi-apps-row">
         <span class="upi-pill">Google Pay</span>
@@ -676,19 +707,18 @@ function renderVendorQRPaymentCard() {
       </div>
     </div>
 
-    <strong>Amount Payable: ₹${total}</strong> (100% Direct Transfer to ${stall.name})<br>
+    <strong>Amount Payable: ₹${total}</strong> (100% Direct Transfer to ${stall.name} - ${upiId})<br>
     <small style="color: #667781;">⚡ Scan or click above, then tap button below after payment!</small>
   `;
 
   appendBotBubble(qrHtml, [
-    { label: `💸 I Have Paid ₹${total} to Vendor`, value: 'CONFIRM_QR_PAYMENT' },
+    { label: `💸 I Have Paid ₹${total} to ${stall.name}`, value: 'CONFIRM_QR_PAYMENT' },
     { label: `🔒 Enter UPI PIN in Modal`, value: 'PAY_NOW_UPI' },
     { label: `❌ Cancel Order`, value: 'CANCEL_ORDER' }
   ]);
 }
 
 window.handleQRClickToPay = function(e) {
-  // If on desktop where deep links might not open natively, provide smooth fallback feedback
   setTimeout(() => {
     openPaymentModal('Direct UPI App Link');
   }, 400);
@@ -700,11 +730,8 @@ function triggerAnimatedPaymentSuccess(paymentData) {
 
   setTimeout(() => {
     typingIndicator.classList.add('hidden');
-
-    // Append Payment Success card with animation
     completeOrderWithPayment(paymentData);
 
-    // Scroll & focus page directly to WhatsApp simulator
     const simulator = document.querySelector('.whatsapp-container');
     if (simulator) {
       simulator.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -818,7 +845,7 @@ function completeOrderWithPayment(paymentData) {
         <i class="fa-solid fa-check"></i>
       </div>
       <h3 style="color: #075E54; margin: 0.2rem 0;">Payment Successful! 🎉</h3>
-      <p style="font-size: 0.85rem; color: #54656f;">Direct Transfer Completed to Vendor</p>
+      <p style="font-size: 0.85rem; color: #54656f;">Direct Transfer Completed to ${newOrder.stallName}</p>
     </div>
     ✅ <strong>Pre-Booking Ticket Generated!</strong><br><br>
     💸 <strong>Money Transferred:</strong> ₹${total} sent directly to <strong>${newOrder.stallName}</strong><br>
@@ -868,6 +895,23 @@ function checkOrderStatusChanges() {
   saveOrders();
 }
 
+// Timeframe Filter Helper
+function filterOrdersByTimeframe(orderList, timeframe) {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+  if (timeframe === 'daily') {
+    return orderList.filter(o => new Date(o.createdAt).getTime() >= todayStart);
+  } else if (timeframe === 'weekly') {
+    const sevenDaysAgo = todayStart - (7 * 24 * 60 * 60 * 1000);
+    return orderList.filter(o => new Date(o.createdAt).getTime() >= sevenDaysAgo);
+  } else if (timeframe === 'monthly') {
+    const thirtyDaysAgo = todayStart - (30 * 24 * 60 * 60 * 1000);
+    return orderList.filter(o => new Date(o.createdAt).getTime() >= thirtyDaysAgo);
+  }
+  return orderList; // 'all'
+}
+
 // ================= VENDOR PORTAL LOGIC =================
 
 function setupVendorListeners() {
@@ -892,6 +936,126 @@ function setupVendorListeners() {
     localStorage.removeItem('current_vendor');
     renderVendorDashboard();
   });
+
+  // Timeframe Tab Buttons inside Vendor Dashboard
+  const tfBtns = document.querySelectorAll('.tf-btn');
+  tfBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tfBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      vendorTimeframe = btn.dataset.tf;
+      renderVendorDashboard();
+    });
+  });
+}
+
+function setupVendorModals() {
+  // Vendor Registration Modal
+  if (openRegisterBtn) {
+    openRegisterBtn.addEventListener('click', () => vendorRegisterModal.classList.remove('hidden'));
+  }
+  if (closeRegisterModalBtn) {
+    closeRegisterModalBtn.addEventListener('click', () => vendorRegisterModal.classList.add('hidden'));
+  }
+
+  vendorRegisterForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reg-stall-name').value.trim();
+    const vendorId = document.getElementById('reg-vendor-id').value.trim();
+    const vendorPass = document.getElementById('reg-vendor-pass').value;
+    const upiId = document.getElementById('reg-vendor-upi').value.trim();
+    const fileInput = document.getElementById('reg-vendor-qr-file');
+
+    if (stalls.some(s => s.vendorId === vendorId)) {
+      alert('Vendor ID already exists! Please choose another Vendor ID.');
+      return;
+    }
+
+    const processCreation = (qrDataUrl) => {
+      const newStall = {
+        id: 'stall_' + Date.now(),
+        name: name,
+        vendorId: vendorId,
+        vendorPass: vendorPass,
+        upiId: upiId,
+        bankAccount: 'Direct Vendor Bank Account',
+        qrImage: qrDataUrl || 'QR.jpeg',
+        menu: [
+          { id: 'm_' + Date.now() + '_1', category: 'Special', name: 'Special Thali', price: 100, available: true },
+          { id: 'm_' + Date.now() + '_2', category: 'Special', name: 'Combo Meal', price: 120, available: true }
+        ]
+      };
+
+      stalls.push(newStall);
+      saveStalls();
+      currentVendor = newStall;
+      localStorage.setItem('current_vendor', JSON.stringify(currentVendor));
+      
+      vendorRegisterModal.classList.add('hidden');
+      vendorRegisterForm.reset();
+      alert(`🎉 Stall "${name}" registered successfully! You are now logged in.`);
+      renderVendorDashboard();
+      renderAdminView();
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (evt) => processCreation(evt.target.result);
+      reader.readAsDataURL(fileInput.files[0]);
+    } else {
+      processCreation('QR.jpeg');
+    }
+  });
+
+  // Vendor Settings Modal
+  if (vendorQrSettingsBtn) {
+    vendorQrSettingsBtn.addEventListener('click', () => {
+      if (!currentVendor) return;
+      document.getElementById('settings-vendor-upi').value = currentVendor.upiId || '';
+      vendorQrSettingsModal.classList.remove('hidden');
+    });
+  }
+  if (updateQrShortcutBtn) {
+    updateQrShortcutBtn.addEventListener('click', () => {
+      if (!currentVendor) return;
+      document.getElementById('settings-vendor-upi').value = currentVendor.upiId || '';
+      vendorQrSettingsModal.classList.remove('hidden');
+    });
+  }
+  if (closeQrSettingsModalBtn) {
+    closeQrSettingsModalBtn.addEventListener('click', () => vendorQrSettingsModal.classList.add('hidden'));
+  }
+
+  vendorQrSettingsForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!currentVendor) return;
+
+    const newUpi = document.getElementById('settings-vendor-upi').value.trim();
+    const fileInput = document.getElementById('settings-vendor-qr-file');
+
+    const updateVendorData = (qrUrl) => {
+      const idx = stalls.findIndex(s => s.id === currentVendor.id);
+      if (idx !== -1) {
+        stalls[idx].upiId = newUpi;
+        if (qrUrl) stalls[idx].qrImage = qrUrl;
+        currentVendor = stalls[idx];
+        localStorage.setItem('current_vendor', JSON.stringify(currentVendor));
+        saveStalls();
+      }
+      vendorQrSettingsModal.classList.add('hidden');
+      alert(`✅ Stall QR Code & UPI settings updated!`);
+      renderVendorDashboard();
+      renderAdminView();
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (evt) => updateVendorData(evt.target.result);
+      reader.readAsDataURL(fileInput.files[0]);
+    } else {
+      updateVendorData(null);
+    }
+  });
 }
 
 function renderVendorDashboard() {
@@ -904,23 +1068,40 @@ function renderVendorDashboard() {
   vendorLoginCard.classList.add('hidden');
   vendorDashboard.classList.remove('hidden');
 
-  const stallOrders = orders.filter(o => o.stallId === currentVendor.id);
-  const totalDirectEarnings = stallOrders.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.total, 0);
+  const allStallOrders = orders.filter(o => o.stallId === currentVendor.id);
+  const filteredOrders = filterOrdersByTimeframe(allStallOrders, vendorTimeframe);
 
-  stallNameTitle.innerHTML = `Stall: ${currentVendor.name} <span style="font-size: 0.85rem; color: var(--accent-green); font-weight: 500;">(Direct Earnings: ₹${totalDirectEarnings})</span>`;
+  const timeframeRevenue = filteredOrders.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.total, 0);
 
-  document.getElementById('stat-total-orders').innerText = stallOrders.length;
-  document.getElementById('stat-pending-orders').innerText = stallOrders.filter(o => o.status === 'CONFIRMED').length;
-  document.getElementById('stat-preparing-orders').innerText = stallOrders.filter(o => o.status === 'PREPARING').length;
-  document.getElementById('stat-ready-orders').innerText = stallOrders.filter(o => o.status === 'READY').length;
+  // Update Stats Header Labels
+  let tfLabel = vendorTimeframe === 'daily' ? 'Daily (Today)' : vendorTimeframe === 'weekly' ? 'Weekly (7 Days)' : 'Monthly (30 Days)';
+  document.getElementById('stat-revenue-label').innerText = `Revenue (${tfLabel})`;
+  document.getElementById('stat-orders-label').innerText = `Orders (${tfLabel})`;
 
+  stallNameTitle.innerHTML = `Stall: ${currentVendor.name} <span style="font-size: 0.85rem; color: var(--accent-green); font-weight: 500;">(${tfLabel} Earnings: ₹${timeframeRevenue})</span>`;
+
+  document.getElementById('stat-timeframe-revenue').innerText = `₹ ${timeframeRevenue}`;
+  document.getElementById('stat-total-orders').innerText = filteredOrders.length;
+  document.getElementById('stat-pending-orders').innerText = allStallOrders.filter(o => o.status === 'CONFIRMED').length;
+  document.getElementById('stat-ready-orders').innerText = allStallOrders.filter(o => o.status === 'READY' || o.status === 'DELIVERED').length;
+
+  // Render QR Code Preview inside Dashboard
+  const qrImgElem = document.getElementById('vendor-current-qr-img');
+  const upiIdElem = document.getElementById('vendor-current-upi-id');
+  if (qrImgElem) qrImgElem.src = currentVendor.qrImage || 'QR.jpeg';
+  if (upiIdElem) upiIdElem.innerText = currentVendor.upiId || 'vendor@lpu.upi';
+
+  // Render Top Selling Items for Vendor
+  renderVendorTopItems(filteredOrders);
+
+  // Render Orders Queue Table
   vendorOrdersTbody.innerHTML = '';
-  if (stallOrders.length === 0) {
+  if (allStallOrders.length === 0) {
     vendorOrdersTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 2rem;">No orders placed for ${currentVendor.name} yet. Place an order from the Student Chatbot!</td></tr>`;
     return;
   }
 
-  stallOrders.slice().reverse().forEach(o => {
+  allStallOrders.slice().reverse().forEach(o => {
     const tr = document.createElement('tr');
 
     let statusBadgeClass = 'status-pending';
@@ -952,6 +1133,47 @@ function renderVendorDashboard() {
   });
 }
 
+function renderVendorTopItems(orderList) {
+  const topListElem = document.getElementById('vendor-top-items-list');
+  if (!topListElem) return;
+
+  const itemCounts = {};
+  orderList.forEach(o => {
+    o.items.forEach(item => {
+      if (!itemCounts[item.name]) {
+        itemCounts[item.name] = { name: item.name, count: 0, totalRevenue: 0 };
+      }
+      itemCounts[item.name].count += 1;
+      itemCounts[item.name].totalRevenue += item.price;
+    });
+  });
+
+  const sortedItems = Object.values(itemCounts).sort((a, b) => b.count - a.count).slice(0, 5);
+  const totalItemCount = sortedItems.reduce((acc, i) => acc + i.count, 0) || 1;
+
+  topListElem.innerHTML = '';
+  if (sortedItems.length === 0) {
+    topListElem.innerHTML = `<p class="subtext" style="padding: 1rem; text-align: center;">No menu item sales recorded for this timeframe yet.</p>`;
+    return;
+  }
+
+  sortedItems.forEach(item => {
+    const pct = Math.round((item.count / totalItemCount) * 100);
+    const row = document.createElement('div');
+    row.className = 'top-item-row';
+    row.innerHTML = `
+      <div class="top-item-meta">
+        <span>${item.name} (${item.count} sold)</span>
+        <span class="top-item-val">₹ ${item.totalRevenue}</span>
+      </div>
+      <div class="item-progress-track">
+        <div class="item-progress-bar" style="width: ${pct}%;"></div>
+      </div>
+    `;
+    topListElem.appendChild(row);
+  });
+}
+
 function updateOrderStatus(orderId, newStatus) {
   const idx = orders.findIndex(o => o.id === orderId);
   if (idx !== -1) {
@@ -965,7 +1187,7 @@ function updateOrderStatus(orderId, newStatus) {
 
 function setupAdminListeners() {
   addItemBtn.addEventListener('click', () => itemModal.classList.remove('hidden'));
-  closeModalBtn.addEventListener('click', () => itemModal.classList.add('hidden'));
+  closeModalBtn.addEventListener('click', () => itemModal.classList.remove('hidden'));
 
   addItemForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -991,12 +1213,53 @@ function setupAdminListeners() {
     itemModal.classList.add('hidden');
     addItemForm.reset();
   });
+
+  // Admin Timeframe Selector
+  const adminTfBtns = document.querySelectorAll('.admin-tf-btn');
+  adminTfBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      adminTfBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      adminTimeframe = btn.dataset.tf;
+      renderAdminView();
+    });
+  });
+
+  // Student Order History Inspector
+  if (studentSearchBtn) {
+    studentSearchBtn.addEventListener('click', () => {
+      const regNo = studentSearchInput.value.trim();
+      renderStudentInspector(regNo);
+    });
+  }
+
+  // Export Sales Report Button
+  if (exportReportBtn) {
+    exportReportBtn.addEventListener('click', exportSalesReportCSV);
+  }
 }
 
 function renderAdminView() {
-  const totalRevenue = orders.reduce((acc, curr) => acc + curr.total, 0);
-  adminRevenue.innerText = `₹ ${totalRevenue}`;
+  const filteredOrders = filterOrdersByTimeframe(orders, adminTimeframe);
+  const totalRevenue = filteredOrders.reduce((acc, curr) => acc + curr.total, 0);
 
+  let tfLabel = adminTimeframe === 'daily' ? 'Today' : adminTimeframe === 'weekly' ? '7 Days' : adminTimeframe === 'monthly' ? '30 Days' : 'All-Time';
+  document.getElementById('admin-revenue-label').innerText = `Total Sales (${tfLabel})`;
+  document.getElementById('admin-orders-label').innerText = `Total Pre-Orders (${tfLabel})`;
+
+  adminRevenue.innerText = `₹ ${totalRevenue}`;
+  document.getElementById('admin-total-orders-count').innerText = filteredOrders.length;
+  document.getElementById('admin-active-stalls-count').innerText = stalls.length;
+
+  // Render Per Vendor Breakdown Table
+  renderPerVendorBreakdown(filteredOrders);
+
+  // Render Student Order History Inspector (Default for prefilled reg No)
+  if (studentSearchInput && studentSearchInput.value) {
+    renderStudentInspector(studentSearchInput.value.trim());
+  }
+
+  // Render Menu List
   adminMenuList.innerHTML = '';
   stalls.forEach(s => {
     s.menu.forEach(item => {
@@ -1017,6 +1280,128 @@ function renderAdminView() {
       adminMenuList.appendChild(row);
     });
   });
+}
+
+function renderPerVendorBreakdown(filteredOrders) {
+  const tbody = document.getElementById('admin-vendor-breakdown-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  stalls.forEach(s => {
+    const stallOrders = filteredOrders.filter(o => o.stallId === s.id);
+    const revenue = stallOrders.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.total, 0);
+    const avgOrderVal = stallOrders.length > 0 ? Math.round(revenue / stallOrders.length) : 0;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>📍 ${s.name}</strong></td>
+      <td><code>${s.vendorId}</code></td>
+      <td><code>${s.upiId}</code></td>
+      <td><strong>${stallOrders.length}</strong> orders</td>
+      <td><strong style="color: var(--accent-green);">₹ ${revenue}</strong></td>
+      <td>₹ ${avgOrderVal}</td>
+      <td><span class="status-indicator live">● Active</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderStudentInspector(regNo) {
+  const container = document.getElementById('student-inspector-result');
+  if (!container) return;
+
+  if (!regNo) {
+    container.innerHTML = `<p class="subtext" style="padding: 1rem;">Please enter a valid Student Registration Number above.</p>`;
+    return;
+  }
+
+  const studentOrders = orders.filter(o => o.studentReg === regNo);
+  const totalSpent = studentOrders.filter(o => o.paymentStatus === 'PAID').reduce((sum, o) => sum + o.total, 0);
+
+  // Calculate favorite stall
+  const stallCounts = {};
+  studentOrders.forEach(o => {
+    stallCounts[o.stallName] = (stallCounts[o.stallName] || 0) + 1;
+  });
+  const favStall = Object.keys(stallCounts).reduce((a, b) => stallCounts[a] > stallCounts[b] ? a : b, 'N/A');
+
+  let historyRows = '';
+  if (studentOrders.length === 0) {
+    historyRows = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No pre-orders recorded for Reg No: <strong>${regNo}</strong> yet.</td></tr>`;
+  } else {
+    studentOrders.slice().reverse().forEach(o => {
+      historyRows += `
+        <tr>
+          <td><strong>${o.id}</strong></td>
+          <td>${o.stallName}</td>
+          <td>${o.items.map(i => i.name).join(', ')}</td>
+          <td><strong style="color: var(--accent-green);">₹ ${o.total}</strong></td>
+          <td>${o.pickupSlot}</td>
+          <td><span class="badge-status status-ready">${o.status}</span></td>
+        </tr>
+      `;
+    });
+  }
+
+  container.innerHTML = `
+    <div class="student-stats-summary">
+      <div class="student-stat-pill">
+        <span>Student Reg No</span>
+        <strong>${regNo}</strong>
+      </div>
+      <div class="student-stat-pill">
+        <span>Total Spent</span>
+        <strong>₹ ${totalSpent}</strong>
+      </div>
+      <div class="student-stat-pill">
+        <span>Total Pre-Orders</span>
+        <strong>${studentOrders.length}</strong>
+      </div>
+      <div class="student-stat-pill">
+        <span>Favorite Stall</span>
+        <strong>${favStall}</strong>
+      </div>
+    </div>
+
+    <h4 style="margin: 0.8rem 0 0.5rem 0; color: white;"><i class="fa-solid fa-clock-rotate-left text-green"></i> Order History Log</h4>
+    <div class="table-responsive">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Stall</th>
+            <th>Items</th>
+            <th>Amount</th>
+            <th>Pickup Slot</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${historyRows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function exportSalesReportCSV() {
+  if (orders.length === 0) {
+    alert('No order records available to export.');
+    return;
+  }
+
+  let csv = 'Order ID,Student Reg No,Stall Name,Items,Total Amount,Pickup Slot,Payment Status,Txn ID,Timestamp\n';
+  orders.forEach(o => {
+    const itemsStr = o.items.map(i => i.name).join(' | ');
+    csv += `"${o.id}","${o.studentReg}","${o.stallName}","${itemsStr}",${o.total},"${o.pickupSlot}","${o.paymentStatus}","${o.txnId || ''}","${o.createdAt}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `Campus_Food_Sales_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+  a.click();
 }
 
 function toggleItemStock(stallId, itemId) {

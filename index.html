@@ -179,7 +179,7 @@
         <div class="login-header">
           <i class="fa-solid fa-store login-icon"></i>
           <h2>Vendor Portal Login</h2>
-          <p>Manage incoming pre-orders and dispatch status notifications to students</p>
+          <p>Manage incoming pre-orders, earnings analytics & custom payment QR</p>
         </div>
         <form id="vendor-login-form" class="login-form">
           <div class="input-group">
@@ -191,6 +191,9 @@
             <input type="password" id="vendor-pass" placeholder="••••••••" value="pass123" required>
           </div>
           <button type="submit" class="primary-btn full-btn">Login to Stall Dashboard</button>
+          <button type="button" id="open-register-btn" class="secondary-btn full-btn" style="margin-top: 0.5rem;">
+            <i class="fa-solid fa-plus-circle"></i> Register New Food Stall & Custom QR
+          </button>
           <div class="login-hint">Demo Credentials: <code>vendor1</code> (Nepali Swadh) | <code>vendor2</code> (Pakka Adda) / Pass: <code>pass123</code></div>
         </form>
       </div>
@@ -200,38 +203,84 @@
         <div class="dashboard-header">
           <div>
             <h2 id="stall-name-title">Stall Dashboard</h2>
-            <p>Live Pre-Booked Orders Queue</p>
+            <p>Live Pre-Booked Orders & Stall Earnings Analytics</p>
           </div>
           <div class="vendor-actions">
             <span class="status-indicator live">● Live Sync Active</span>
+            <button id="vendor-qr-settings-btn" class="secondary-btn"><i class="fa-solid fa-qrcode"></i> QR & UPI Settings</button>
             <button id="vendor-logout-btn" class="secondary-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
           </div>
         </div>
 
-        <!-- Order Filter & Counters -->
+        <!-- Timeframe Analytics Filter -->
+        <div class="timeframe-bar glass-card">
+          <div class="timeframe-title"><i class="fa-solid fa-chart-line text-green"></i> Earnings Analytics Filter:</div>
+          <div class="timeframe-buttons">
+            <button class="tf-btn active" data-tf="daily"><i class="fa-solid fa-calendar-day"></i> Daily (Today)</button>
+            <button class="tf-btn" data-tf="weekly"><i class="fa-solid fa-calendar-week"></i> Weekly (7 Days)</button>
+            <button class="tf-btn" data-tf="monthly"><i class="fa-solid fa-calendar-days"></i> Monthly (30 Days)</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Vendor Financial Stats -->
         <div class="stats-grid">
           <div class="stat-card">
+            <i class="fa-solid fa-indian-rupee-sign stat-icon"></i>
+            <div class="stat-num" id="stat-timeframe-revenue">₹ 0</div>
+            <div class="stat-label" id="stat-revenue-label">Daily Revenue (Today)</div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-solid fa-bag-shopping stat-icon"></i>
             <div class="stat-num" id="stat-total-orders">0</div>
-            <div class="stat-label">Total Orders Today</div>
+            <div class="stat-label" id="stat-orders-label">Orders (Today)</div>
           </div>
           <div class="stat-card pending">
+            <i class="fa-solid fa-clock stat-icon"></i>
             <div class="stat-num" id="stat-pending-orders">0</div>
             <div class="stat-label">Pending / Confirmed</div>
           </div>
-          <div class="stat-card preparing">
-            <div class="stat-num" id="stat-preparing-orders">0</div>
-            <div class="stat-label">In Preparation</div>
-          </div>
           <div class="stat-card ready">
+            <i class="fa-solid fa-circle-check stat-icon"></i>
             <div class="stat-num" id="stat-ready-orders">0</div>
-            <div class="stat-label">Ready for Pickup</div>
+            <div class="stat-label">Ready / Picked Up</div>
+          </div>
+        </div>
+
+        <!-- Vendor Analytics Grid: Top Selling Items & QR Info -->
+        <div class="admin-grid">
+          <!-- Top Selling Menu Items -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-fire text-green"></i> Top Selling Menu Items</h3>
+              <span class="subtext" id="top-items-subtext">Sales ranking for selected timeframe</span>
+            </div>
+            <div class="top-items-list" id="vendor-top-items-list">
+              <!-- Dynamically populated top items -->
+            </div>
+          </div>
+
+          <!-- Stall QR Code & UPI Card -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-qrcode text-green"></i> Active Payment QR & UPI</h3>
+            </div>
+            <div class="vendor-qr-preview-box">
+              <div class="qr-preview-img-container">
+                <img id="vendor-current-qr-img" src="QR.jpeg" alt="Stall Payment QR">
+              </div>
+              <div class="qr-preview-info">
+                <p><strong>UPI ID:</strong> <code id="vendor-current-upi-id">nepaliswadh@lpu.upi</code></p>
+                <p class="subtext">This QR code is displayed to students when they pre-book food from your stall.</p>
+                <button class="primary-btn sm" id="update-qr-shortcut-btn"><i class="fa-solid fa-upload"></i> Upload Custom QR</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Orders Table / List -->
         <div class="orders-section glass-card">
           <div class="section-title">
-            <h3>Active Orders</h3>
+            <h3><i class="fa-solid fa-list-check"></i> Live Orders Queue</h3>
             <span class="subtext">Updating order status sends automatic WhatsApp notification to student!</span>
           </div>
           <div class="table-responsive">
@@ -263,32 +312,91 @@
         <div class="dashboard-header">
           <div>
             <h2>Developer & Admin Portal</h2>
-            <p>Campus Food Operations, Stall Controls, & Demand Analytics</p>
+            <p>Campus Operations, Vendor Performance Analytics & Student Order Insights</p>
           </div>
-          <div class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Super Admin Mode</div>
+          <div class="admin-actions">
+            <button id="export-report-btn" class="primary-btn sm"><i class="fa-solid fa-file-export"></i> Export Sales Report (CSV)</button>
+            <div class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Super Admin Mode</div>
+          </div>
+        </div>
+
+        <!-- Admin Global Timeframe Filter -->
+        <div class="timeframe-bar glass-card">
+          <div class="timeframe-title"><i class="fa-solid fa-filter text-green"></i> Campus Sales Timeframe:</div>
+          <div class="timeframe-buttons">
+            <button class="admin-tf-btn active" data-tf="daily"><i class="fa-solid fa-calendar-day"></i> Daily (Today)</button>
+            <button class="admin-tf-btn" data-tf="weekly"><i class="fa-solid fa-calendar-week"></i> Weekly (7 Days)</button>
+            <button class="admin-tf-btn" data-tf="monthly"><i class="fa-solid fa-calendar-days"></i> Monthly (30 Days)</button>
+            <button class="admin-tf-btn" data-tf="all"><i class="fa-solid fa-globe"></i> All Time</button>
+          </div>
         </div>
 
         <!-- Analytics Overview -->
         <div class="stats-grid admin-stats">
           <div class="stat-card">
             <i class="fa-solid fa-utensils stat-icon"></i>
-            <div class="stat-num">4</div>
+            <div class="stat-num" id="admin-active-stalls-count">2</div>
             <div class="stat-label">Active Food Stalls</div>
           </div>
           <div class="stat-card">
             <i class="fa-solid fa-chart-line stat-icon"></i>
-            <div class="stat-num" id="admin-revenue">₹ 4,250</div>
-            <div class="stat-label">Total Sales Today</div>
+            <div class="stat-num" id="admin-revenue">₹ 0</div>
+            <div class="stat-label" id="admin-revenue-label">Total Sales (Today)</div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-solid fa-receipt stat-icon"></i>
+            <div class="stat-num" id="admin-total-orders-count">0</div>
+            <div class="stat-label" id="admin-orders-label">Total Pre-Orders</div>
           </div>
           <div class="stat-card">
             <i class="fa-solid fa-fire stat-icon"></i>
             <div class="stat-num">12:30 - 1:30 PM</div>
             <div class="stat-label">Peak Demand Slot</div>
           </div>
-          <div class="stat-card">
-            <i class="fa-solid fa-clock-rotate-left stat-icon"></i>
-            <div class="stat-num">8 Mins</div>
-            <div class="stat-label">Avg Preparation Time</div>
+        </div>
+
+        <!-- Per Vendor Revenue Breakdown Table -->
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-store text-green"></i> Per-Vendor Earnings Breakdown</h3>
+            <span class="subtext">Comparative revenue & order volume across all food stalls</span>
+          </div>
+          <div class="table-responsive">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Food Stall Name</th>
+                  <th>Vendor ID</th>
+                  <th>Vendor UPI ID</th>
+                  <th>Total Orders</th>
+                  <th>Total Revenue</th>
+                  <th>Avg Order Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-vendor-breakdown-tbody">
+                <!-- Dynamic per-vendor rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Student Order History Inspector -->
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-user-graduate text-green"></i> Student Order History Inspector</h3>
+            <span class="subtext">Lookup any student reg number to view total spent & pre-order logs</span>
+          </div>
+
+          <div class="student-search-bar">
+            <div class="input-group inline-input">
+              <input type="text" id="student-search-input" placeholder="Enter Student Reg No (e.g. 12204891)" value="12204891">
+              <button id="student-search-btn" class="primary-btn"><i class="fa-solid fa-magnifying-glass"></i> Inspect Student Orders</button>
+            </div>
+          </div>
+
+          <div id="student-inspector-result" class="student-inspector-card">
+            <!-- Dynamically populated student history -->
           </div>
         </div>
 
@@ -337,8 +445,8 @@
             <div class="smart-features-box">
               <h4><i class="fa-solid fa-brain"></i> Smart Algorithmic Insights</h4>
               <ul>
-                <li><i class="fa-solid fa-check text-green"></i> DSA-based Slot Optimization active to balance kitchen load.</li>
-                <li><i class="fa-solid fa-check text-green"></i> Auto estimated wait times based on queue size.</li>
+                <li><i class="fa-solid fa-check text-green"></i> Multi-vendor QR isolation active. Direct payments route to individual vendor UPIs.</li>
+                <li><i class="fa-solid fa-check text-green"></i> Daily, Weekly & Monthly aggregate revenue tracking operational.</li>
               </ul>
             </div>
           </div>
@@ -347,6 +455,61 @@
     </section>
 
   </main>
+
+  <!-- Modal for Vendor Registration & Custom QR Upload -->
+  <div id="vendor-register-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-store text-green"></i> Register New Food Stall</h3>
+        <button id="close-register-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="vendor-register-form">
+        <div class="input-group">
+          <label>Stall Name</label>
+          <input type="text" id="reg-stall-name" placeholder="e.g. Royal South Indian" required>
+        </div>
+        <div class="input-group">
+          <label>Vendor ID (Login)</label>
+          <input type="text" id="reg-vendor-id" placeholder="e.g. vendor3" required>
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="reg-vendor-pass" placeholder="••••••••" required>
+        </div>
+        <div class="input-group">
+          <label>Direct Vendor UPI ID</label>
+          <input type="text" id="reg-vendor-upi" placeholder="e.g. royalsouth@lpu.upi" required>
+        </div>
+        <div class="input-group">
+          <label><i class="fa-solid fa-qrcode text-green"></i> Upload Custom QR Code Image</label>
+          <input type="file" id="reg-vendor-qr-file" accept="image/*" class="file-input">
+          <small style="color: var(--text-muted);">If left blank, default vendor QR format will be generated.</small>
+        </div>
+        <button type="submit" class="primary-btn full-btn">Create Food Stall & Vendor Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Vendor QR & Payment Settings -->
+  <div id="vendor-qr-settings-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-qrcode text-green"></i> Update Stall QR & UPI Settings</h3>
+        <button id="close-qr-settings-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="vendor-qr-settings-form">
+        <div class="input-group">
+          <label>Vendor UPI ID</label>
+          <input type="text" id="settings-vendor-upi" required>
+        </div>
+        <div class="input-group">
+          <label>Upload New Payment QR Code Image</label>
+          <input type="file" id="settings-vendor-qr-file" accept="image/*" class="file-input">
+        </div>
+        <button type="submit" class="primary-btn full-btn">Save Payment Settings</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal for Adding Menu Item -->
   <div id="item-modal" class="modal-overlay hidden">
