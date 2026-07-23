@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">LPU Smart Canteen</string>
-    <string name="title_activity_main">LPU Smart Canteen</string>
-    <string name="package_name">com.lpu.smartcanteen</string>
-    <string name="custom_url_scheme">com.lpu.smartcanteen</string>
-</resources>

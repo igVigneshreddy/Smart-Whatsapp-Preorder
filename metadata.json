@@ -1,8 +1,0 @@
-{
-  "name": "Smart WhatsApp Food Pre-Booking System",
-  "description": "An AI-powered WhatsApp chatbot and web dashboard for student food pre-booking, digital menus, real-time order tracking, and stall analytics.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

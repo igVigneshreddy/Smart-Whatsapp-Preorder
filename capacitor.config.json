@@ -1,9 +1,0 @@
-{
-  "appId": "com.lpu.smartcanteen",
-  "appName": "LPU Smart Canteen",
-  "webDir": "dist",
-  "bundledWebRuntime": false,
-  "server": {
-    "cleartext": true
-  }
-}

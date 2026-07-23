@@ -1,13 +1,391 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart WhatsApp Food Pre-Booking System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 
+  <!-- Top Navigation & Role Switcher -->
+  <header class="app-header">
+    <div class="logo-area">
+      <div class="logo-icon"><i class="fa-brands fa-whatsapp"></i></div>
+      <div class="logo-text">
+        <h1>CampusByte</h1>
+        <span>Smart WhatsApp Pre-Booking</span>
+      </div>
+    </div>
+    
+    <nav class="role-nav">
+      <button class="nav-btn active" data-view="student-view">
+        <i class="fa-solid fa-mobile-screen-button"></i> Student Bot
+      </button>
+      <button class="nav-btn" data-view="vendor-view">
+        <i class="fa-solid fa-store"></i> Vendor Portal
+      </button>
+      <button class="nav-btn" data-view="admin-view">
+        <i class="fa-solid fa-user-gear"></i> Admin Dashboard
+      </button>
+    </nav>
+  </header>
+
+  <main class="main-container">
+
+    <!-- ================= STUDENT VIEW ================= -->
+    <section id="student-view" class="view-section active">
+      <div class="student-grid">
+        
+        <!-- Left Banner: High-Impact Campus Advertisement Card -->
+        <div class="qr-card glass-card ad-banner-card">
+          <div class="ad-top-badge">
+            <span class="badge ad-badge pulse"><i class="fa-solid fa-fire"></i> Campus Special</span>
+            <span class="badge ad-badge-secondary"><i class="fa-solid fa-bolt"></i> Express Pickup</span>
+          </div>
+
+          <div class="ad-header">
+            <h2 class="ad-headline">Skip the Queue, Pre-Order Here!</h2>
+            <p class="ad-subline">
+              ⚡ <strong>Save 20+ Minutes Every Break!</strong> Order fresh hot meals from your favorite campus stalls via WhatsApp, pay vendors directly with instant UPI, and pick up hot food at your chosen time without standing in long lines.
+            </p>
+          </div>
+
+          <div class="ad-highlights">
+            <div class="ad-chip">
+              <i class="fa-solid fa-stopwatch text-green"></i>
+              <div>
+                <strong>Zero Waiting Time</strong>
+                <span>Hot food ready right as your break starts</span>
+              </div>
+            </div>
+            <div class="ad-chip">
+              <i class="fa-solid fa-shield-halved text-green"></i>
+              <div>
+                <strong>Direct Vendor Payment</strong>
+                <span>100% real-time direct UPI transfer</span>
+              </div>
+            </div>
+            <div class="ad-chip">
+              <i class="fa-brands fa-whatsapp text-green"></i>
+              <div>
+                <strong>Live Order Alerts</strong>
+                <span>Get real-time WhatsApp pickup notifications</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="how-it-works-steps">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-info">
+                <strong>Select Meal & Time Slot</strong>
+                <p>Choose items and pick your ideal pickup time</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-info">
+                <strong>Pay Direct via Vendor QR</strong>
+                <p>Instant UPI confirmation sent to stall kitchen</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-info">
+                <strong>Express Express Pickup</strong>
+                <p>Skip the crowd and grab your meal instantly</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="student-registration">
+            <label for="reg-number"><i class="fa-solid fa-id-card"></i> Student Reg Number:</label>
+            <input type="text" id="reg-number" placeholder="e.g. 12204891" value="12204891">
+            <button id="start-chat-btn" class="primary-btn ad-cta-btn pulse">
+              <i class="fa-brands fa-whatsapp"></i> Launch WhatsApp Pre-Booking & Pay
+            </button>
+          </div>
+
+          <div class="feature-pills">
+            <span><i class="fa-solid fa-clock"></i> Save 20+ Mins</span>
+            <span><i class="fa-solid fa-shield-halved"></i> Direct Vendor UPI</span>
+            <span><i class="fa-solid fa-bell"></i> Live WhatsApp Alerts</span>
+          </div>
+        </div>
+
+        <!-- Right Side: Authentic WhatsApp Web Simulator -->
+        <div class="whatsapp-container">
+          <!-- Chat Header -->
+          <div class="wa-header">
+            <div class="avatar">
+              <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=120&q=80" alt="Bot Avatar">
+              <span class="online-dot"></span>
+            </div>
+            <div class="wa-user-info">
+              <h3>LPU Food Pre-Booking Assistant <i class="fa-solid fa-circle-check verified-badge"></i></h3>
+              <p id="bot-status-text">Official Bot • Online</p>
+            </div>
+            <div class="wa-header-actions">
+              <button title="Restart Chat" id="reset-chat-btn"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Chat Messages Body -->
+          <div class="wa-chat-body" id="chat-body">
+            <div class="wa-date-divider">Today</div>
+            
+            <div class="chat-bubble bot-bubble">
+              <div class="message-content">
+                Welcome to the <strong>LPU Food Pre-Booking Assistant</strong>! 🪅<br>
+                How can I help you today?
+              </div>
+              <div class="message-meta">12:00 PM</div>
+            </div>
+
+            <!-- Quick Options Chip Container -->
+            <div class="chat-options" id="chat-options-container">
+              <button class="opt-btn" onclick="sendQuickOption('1. 🥪 Pre-book Food')">1. 🥪 Pre-book Food</button>
+              <button class="opt-btn" onclick="sendQuickOption('2. 📋 View Menu')">2. 📋 View Menu</button>
+              <button class="opt-btn" onclick="sendQuickOption('3. 📦 Track Order')">3. 📦 Track Order</button>
+              <button class="opt-btn" onclick="sendQuickOption('4. ❓ Help')">4. ❓ Help</button>
+            </div>
+          </div>
+
+          <!-- Typing indicator bar -->
+          <div class="typing-indicator hidden" id="typing-indicator">
+            <span></span><span></span><span></span> Assistant is typing...
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="wa-footer">
+            <button class="wa-icon-btn"><i class="fa-regular fa-face-smile"></i></button>
+            <input type="text" id="chat-input" placeholder="Type a message or select an option..." autocomplete="off">
+            <button id="send-btn" class="wa-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= VENDOR PORTAL ================= -->
+    <section id="vendor-view" class="view-section">
+      <!-- Login Overlay if not authenticated -->
+      <div id="vendor-login-card" class="login-card glass-card">
+        <div class="login-header">
+          <i class="fa-solid fa-store login-icon"></i>
+          <h2>Vendor Portal Login</h2>
+          <p>Manage incoming pre-orders and dispatch status notifications to students</p>
+        </div>
+        <form id="vendor-login-form" class="login-form">
+          <div class="input-group">
+            <label>Vendor ID</label>
+            <input type="text" id="vendor-id" placeholder="e.g. vendor1" value="vendor1" required>
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="vendor-pass" placeholder="••••••••" value="pass123" required>
+          </div>
+          <button type="submit" class="primary-btn full-btn">Login to Stall Dashboard</button>
+          <div class="login-hint">Demo Credentials: <code>vendor1</code> (Nepali Swadh) | <code>vendor2</code> (Pakka Adda) / Pass: <code>pass123</code></div>
+        </form>
+      </div>
+
+      <!-- Main Vendor Dashboard (Shown post login) -->
+      <div id="vendor-dashboard" class="vendor-dashboard hidden">
+        <div class="dashboard-header">
+          <div>
+            <h2 id="stall-name-title">Stall Dashboard</h2>
+            <p>Live Pre-Booked Orders Queue</p>
+          </div>
+          <div class="vendor-actions">
+            <span class="status-indicator live">● Live Sync Active</span>
+            <button id="vendor-logout-btn" class="secondary-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+          </div>
+        </div>
+
+        <!-- Order Filter & Counters -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total-orders">0</div>
+            <div class="stat-label">Total Orders Today</div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-num" id="stat-pending-orders">0</div>
+            <div class="stat-label">Pending / Confirmed</div>
+          </div>
+          <div class="stat-card preparing">
+            <div class="stat-num" id="stat-preparing-orders">0</div>
+            <div class="stat-label">In Preparation</div>
+          </div>
+          <div class="stat-card ready">
+            <div class="stat-num" id="stat-ready-orders">0</div>
+            <div class="stat-label">Ready for Pickup</div>
+          </div>
+        </div>
+
+        <!-- Orders Table / List -->
+        <div class="orders-section glass-card">
+          <div class="section-title">
+            <h3>Active Orders</h3>
+            <span class="subtext">Updating order status sends automatic WhatsApp notification to student!</span>
+          </div>
+          <div class="table-responsive">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Student Reg No</th>
+                  <th>Items Ordered</th>
+                  <th>Payment Status</th>
+                  <th>Pickup Slot</th>
+                  <th>Est. Time</th>
+                  <th>Order Status</th>
+                  <th>Update Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vendor-orders-tbody">
+                <!-- Dynamic order rows rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ADMIN DASHBOARD ================= -->
+    <section id="admin-view" class="view-section">
+      <div class="admin-dashboard">
+        <div class="dashboard-header">
+          <div>
+            <h2>Developer & Admin Portal</h2>
+            <p>Campus Food Operations, Stall Controls, & Demand Analytics</p>
+          </div>
+          <div class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Super Admin Mode</div>
+        </div>
+
+        <!-- Analytics Overview -->
+        <div class="stats-grid admin-stats">
+          <div class="stat-card">
+            <i class="fa-solid fa-utensils stat-icon"></i>
+            <div class="stat-num">4</div>
+            <div class="stat-label">Active Food Stalls</div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-solid fa-chart-line stat-icon"></i>
+            <div class="stat-num" id="admin-revenue">₹ 4,250</div>
+            <div class="stat-label">Total Sales Today</div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-solid fa-fire stat-icon"></i>
+            <div class="stat-num">12:30 - 1:30 PM</div>
+            <div class="stat-label">Peak Demand Slot</div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-solid fa-clock-rotate-left stat-icon"></i>
+            <div class="stat-num">8 Mins</div>
+            <div class="stat-label">Avg Preparation Time</div>
+          </div>
+        </div>
+
+        <!-- Stall & Menu Management Section -->
+        <div class="admin-grid">
+          <!-- Stalls and Menu Control -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-layer-group"></i> Manage Food Stalls & Menu</h3>
+              <button class="primary-btn sm" id="add-menu-item-btn"><i class="fa-solid fa-plus"></i> Add Menu Item</button>
+            </div>
+            <div class="menu-list" id="admin-menu-list">
+              <!-- Dynamically populated menu items -->
+            </div>
+          </div>
+
+          <!-- Queue & Pickup Slot Optimization -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-sliders"></i> Pickup Slot & Capacity Control</h3>
+            </div>
+            <div class="slots-control-list">
+              <div class="slot-item">
+                <div>
+                  <strong>12:30 PM Slot</strong>
+                  <p class="subtext">Capacity: 25 orders max</p>
+                </div>
+                <span class="badge badge-warning">High Demand</span>
+              </div>
+              <div class="slot-item">
+                <div>
+                  <strong>1:00 PM Slot</strong>
+                  <p class="subtext">Capacity: 30 orders max</p>
+                </div>
+                <span class="badge badge-success">Optimal</span>
+              </div>
+              <div class="slot-item">
+                <div>
+                  <strong>1:30 PM Slot</strong>
+                  <p class="subtext">Capacity: 20 orders max</p>
+                </div>
+                <span class="badge badge-success">Optimal</span>
+              </div>
+            </div>
+
+            <div class="smart-features-box">
+              <h4><i class="fa-solid fa-brain"></i> Smart Algorithmic Insights</h4>
+              <ul>
+                <li><i class="fa-solid fa-check text-green"></i> DSA-based Slot Optimization active to balance kitchen load.</li>
+                <li><i class="fa-solid fa-check text-green"></i> Auto estimated wait times based on queue size.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Adding Menu Item -->
+  <div id="item-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>Add New Menu Item</h3>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="add-item-form">
+        <div class="input-group">
+          <label>Stall Name</label>
+          <input type="text" id="modal-stall" value="Nepali Swadh" required>
+        </div>
+        <div class="input-group">
+          <label>Item Name</label>
+          <input type="text" id="modal-item-name" placeholder="e.g. Cheese Burger" required>
+        </div>
+        <div class="input-group">
+          <label>Price (₹)</label>
+          <input type="number" id="modal-price" placeholder="70" required>
+        </div>
+        <button type="submit" class="primary-btn full-btn">Save Item</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Real-Time UPI Payment -->
+  <div id="payment-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card payment-modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved text-green"></i> Real-Time Direct UPI Payment</h3>
+        <button id="close-payment-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="payment-modal-body" id="payment-modal-content">
+        <!-- Dynamically injected payment portal content -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
