@@ -104,11 +104,37 @@
           </div>
 
           <div class="student-registration">
-            <label for="reg-number"><i class="fa-solid fa-id-card"></i> Student Reg Number:</label>
-            <input type="text" id="reg-number" placeholder="e.g. 12204891" value="12204891">
-            <button id="start-chat-btn" class="primary-btn ad-cta-btn pulse">
-              <i class="fa-brands fa-whatsapp"></i> Launch WhatsApp Pre-Booking & Pay
+            <div class="registration-card-title">
+              <h3><i class="fa-solid fa-user-pen text-green"></i> Register Student Information</h3>
+              <span class="subtext">Enter registration number to unlock instant food pre-booking</span>
+            </div>
+
+            <!-- Quick Demo Student Selection -->
+            <div class="input-group" style="margin-top: 0.8rem;">
+              <label for="demo-student-select"><i class="fa-solid fa-users"></i> Quick Demo Student Record:</label>
+              <select id="demo-student-select" class="registration-select">
+                <option value="12204891" data-name="Vignesh Reddy">12204891 - Vignesh Reddy (B.Tech CSE - BH-3)</option>
+                <option value="12201122" data-name="Rahul Sharma">12201122 - Rahul Sharma (B.Tech ECE - BH-1)</option>
+                <option value="12209988" data-name="Priya Patel">12209988 - Priya Patel (MBA - GH-2)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="reg-number"><i class="fa-solid fa-id-card"></i> Student Reg Number:</label>
+              <input type="text" id="reg-number" placeholder="e.g. 12204891" value="12204891" required>
+            </div>
+
+            <div class="input-group">
+              <label for="student-name-input"><i class="fa-solid fa-user"></i> Student Name:</label>
+              <input type="text" id="student-name-input" placeholder="e.g. Vignesh Reddy" value="Vignesh Reddy" required>
+            </div>
+
+            <button id="start-chat-btn" class="primary-btn ad-cta-btn glow-pulse">
+              <i class="fa-solid fa-user-check"></i> Register Student & Start Pre-Ordering
             </button>
+            <div id="registration-status-badge" class="reg-status-pill hidden">
+              <i class="fa-solid fa-circle-check"></i> Student Registered & Verified
+            </div>
           </div>
 
           <div class="feature-pills">

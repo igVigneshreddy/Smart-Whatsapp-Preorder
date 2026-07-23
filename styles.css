@@ -354,6 +354,52 @@ body {
   100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
 }
 
+.glow-pulse {
+  animation: lightUpPulse 1.8s infinite alternate;
+}
+
+@keyframes lightUpPulse {
+  0% {
+    box-shadow: 0 0 10px rgba(37, 211, 102, 0.4), 0 0 20px rgba(37, 211, 102, 0.2);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(37, 211, 102, 0.8), 0 0 40px rgba(37, 211, 102, 0.4);
+    transform: scale(1.02);
+  }
+}
+
+.registration-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-glass);
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.registration-select:focus {
+  border-color: var(--accent-green);
+}
+
+.reg-status-pill {
+  background: rgba(37, 211, 102, 0.15);
+  border: 1px solid #25D366;
+  color: #25D366;
+  padding: 0.55rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
 .feature-pills {
   display: flex;
   gap: 0.5rem;

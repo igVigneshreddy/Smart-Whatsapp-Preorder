@@ -273,11 +273,54 @@ function setupChatListeners() {
     if (e.key === 'Enter') handleUserSendMessage();
   });
 
+  const demoStudentSelect = document.getElementById('demo-student-select');
+  const studentNameInput = document.getElementById('student-name-input');
+  const regStatusBadge = document.getElementById('registration-status-badge');
+
+  if (demoStudentSelect) {
+    demoStudentSelect.addEventListener('change', (e) => {
+      const selectedOpt = e.target.options[e.target.selectedIndex];
+      regInput.value = selectedOpt.value;
+      if (studentNameInput) studentNameInput.value = selectedOpt.dataset.name || 'Vignesh Reddy';
+    });
+  }
+
   if (startChatBtn) {
     startChatBtn.addEventListener('click', () => {
-      document.querySelector('.role-nav .nav-btn[data-view="student-view"]').click();
-      chatInput.focus();
-      chatInput.scrollIntoView({ behavior: 'smooth' });
+      const regNo = regInput.value.trim() || '12204891';
+      const studentName = studentNameInput ? studentNameInput.value.trim() : 'Vignesh Reddy';
+
+      if (!regNo || !studentName) {
+        alert('Please enter a valid Student Registration Number and Student Name.');
+        return;
+      }
+
+      // Light up registration button & show verified status badge
+      startChatBtn.classList.add('glow-pulse');
+      if (regStatusBadge) regStatusBadge.classList.remove('hidden');
+
+      // Scroll to WhatsApp simulator
+      const simulator = document.querySelector('.whatsapp-container');
+      if (simulator) {
+        simulator.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        simulator.style.boxShadow = '0 0 35px rgba(37, 211, 102, 0.6)';
+        setTimeout(() => {
+          simulator.style.boxShadow = '0 25px 50px rgba(0, 0, 0, 0.4)';
+        }, 2000);
+      }
+
+      // Append personalized verification bot message
+      chatState = { step: 'SELECT_STALL', selectedStall: null, selectedCategory: null, cartItems: [], selectedSlot: null };
+      
+      let stallOptions = stalls.map(s => ({ label: `📍 ${s.name}`, value: s.name }));
+      appendBotBubble(
+        `🎉 <strong>Student Information Verified & Registered!</strong><br><br>` +
+        `👤 <strong>Student Name:</strong> ${studentName}<br>` +
+        `🎴 <strong>Reg Number:</strong> <code>${regNo}</code><br><br>` +
+        `✅ Your student profile is activated for direct vendor pre-orders!<br>` +
+        `Please select a food stall to pre-book from:`,
+        stallOptions
+      );
     });
   }
 
