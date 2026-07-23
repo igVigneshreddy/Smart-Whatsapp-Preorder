@@ -246,41 +246,27 @@
           </div>
         </div>
 
-        <!-- Vendor Analytics Grid: Top Selling Items & QR Info -->
-        <div class="admin-grid">
-          <!-- Top Selling Menu Items -->
-          <div class="glass-card">
-            <div class="card-header">
-              <h3><i class="fa-solid fa-fire text-green"></i> Top Selling Menu Items</h3>
-              <span class="subtext" id="top-items-subtext">Sales ranking for selected timeframe</span>
-            </div>
-            <div class="top-items-list" id="vendor-top-items-list">
-              <!-- Dynamically populated top items -->
-            </div>
+        <!-- Top Selling Menu Items -->
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-fire text-green"></i> Top Selling Menu Items</h3>
+            <span class="subtext" id="top-items-subtext">Sales ranking for selected timeframe</span>
           </div>
-
-          <!-- Stall QR Code & UPI Card -->
-          <div class="glass-card">
-            <div class="card-header">
-              <h3><i class="fa-solid fa-qrcode text-green"></i> Active Payment QR & UPI</h3>
-            </div>
-            <div class="vendor-qr-preview-box">
-              <div class="qr-preview-img-container">
-                <img id="vendor-current-qr-img" src="QR.jpeg" alt="Stall Payment QR">
-              </div>
-              <div class="qr-preview-info">
-                <p><strong>UPI ID:</strong> <code id="vendor-current-upi-id">nepaliswadh@lpu.upi</code></p>
-                <p class="subtext">This QR code is displayed to students when they pre-book food from your stall.</p>
-                <button class="primary-btn sm" id="update-qr-shortcut-btn"><i class="fa-solid fa-upload"></i> Upload Custom QR</button>
-              </div>
-            </div>
+          <div class="top-items-list" id="vendor-top-items-list">
+            <!-- Dynamically populated top items -->
           </div>
         </div>
 
-        <!-- Orders Table / List -->
-        <div class="orders-section glass-card">
+        <!-- Vendor Dashboard Sub-Tabs -->
+        <div class="vendor-subtabs-bar">
+          <button id="vendor-tab-orders" class="vendor-subtab-btn active"><i class="fa-solid fa-list-check"></i> Active Orders Queue</button>
+          <button id="vendor-tab-payments" class="vendor-subtab-btn"><i class="fa-solid fa-receipt"></i> Payment History Log</button>
+        </div>
+
+        <!-- Active Orders Table / List -->
+        <div id="vendor-active-orders-section" class="orders-section glass-card">
           <div class="section-title">
-            <h3><i class="fa-solid fa-list-check"></i> Live Orders Queue</h3>
+            <h3><i class="fa-solid fa-list-check"></i> Live Pre-Booked Orders Queue</h3>
             <span class="subtext">Updating order status sends automatic WhatsApp notification to student!</span>
           </div>
           <div class="table-responsive">
@@ -299,6 +285,32 @@
               </thead>
               <tbody id="vendor-orders-tbody">
                 <!-- Dynamic order rows rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Payment History Log Table -->
+        <div id="vendor-payment-history-section" class="orders-section glass-card hidden">
+          <div class="section-title">
+            <h3><i class="fa-solid fa-receipt text-green"></i> Direct Vendor Payment History Log</h3>
+            <span class="subtext">Every payment received directly via UPI / QR code with transaction verification</span>
+          </div>
+          <div class="table-responsive">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Student Reg No</th>
+                  <th>Order ID</th>
+                  <th>Items Ordered</th>
+                  <th>Amount Paid</th>
+                  <th>Date & Time</th>
+                  <th>Verification</th>
+                </tr>
+              </thead>
+              <tbody id="vendor-payments-tbody">
+                <!-- Dynamic payment history rows rendered here -->
               </tbody>
             </table>
           </div>

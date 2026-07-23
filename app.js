@@ -719,9 +719,11 @@ function renderVendorQRPaymentCard() {
 }
 
 window.handleQRClickToPay = function(e) {
-  setTimeout(() => {
-    openPaymentModal('Direct UPI App Link');
-  }, 400);
+  if (e && e.preventDefault) e.preventDefault();
+  triggerAnimatedPaymentSuccess({
+    method: 'Auto-Detected Vendor UPI Direct',
+    txnId: 'TXN' + Math.floor(10000000 + Math.random() * 90000000)
+  });
 };
 
 // Trigger Animated Payment Processing & Direct Redirection to Simulator
@@ -947,6 +949,28 @@ function setupVendorListeners() {
       renderVendorDashboard();
     });
   });
+
+  // Vendor Dashboard Subtabs (Active Orders vs Payment History)
+  const tabOrders = document.getElementById('vendor-tab-orders');
+  const tabPayments = document.getElementById('vendor-tab-payments');
+  const secOrders = document.getElementById('vendor-active-orders-section');
+  const secPayments = document.getElementById('vendor-payment-history-section');
+
+  if (tabOrders && tabPayments) {
+    tabOrders.addEventListener('click', () => {
+      tabOrders.classList.add('active');
+      tabPayments.classList.remove('active');
+      secOrders.classList.remove('hidden');
+      secPayments.classList.add('hidden');
+    });
+
+    tabPayments.addEventListener('click', () => {
+      tabPayments.classList.add('active');
+      tabOrders.classList.remove('active');
+      secPayments.classList.remove('hidden');
+      secOrders.classList.add('hidden');
+    });
+  }
 }
 
 function setupVendorModals() {
@@ -1015,13 +1039,6 @@ function setupVendorModals() {
       vendorQrSettingsModal.classList.remove('hidden');
     });
   }
-  if (updateQrShortcutBtn) {
-    updateQrShortcutBtn.addEventListener('click', () => {
-      if (!currentVendor) return;
-      document.getElementById('settings-vendor-upi').value = currentVendor.upiId || '';
-      vendorQrSettingsModal.classList.remove('hidden');
-    });
-  }
   if (closeQrSettingsModalBtn) {
     closeQrSettingsModalBtn.addEventListener('click', () => vendorQrSettingsModal.classList.add('hidden'));
   }
@@ -1085,52 +1102,70 @@ function renderVendorDashboard() {
   document.getElementById('stat-pending-orders').innerText = allStallOrders.filter(o => o.status === 'CONFIRMED').length;
   document.getElementById('stat-ready-orders').innerText = allStallOrders.filter(o => o.status === 'READY' || o.status === 'DELIVERED').length;
 
-  // Render QR Code Preview inside Dashboard
-  const qrImgElem = document.getElementById('vendor-current-qr-img');
-  const upiIdElem = document.getElementById('vendor-current-upi-id');
-  if (qrImgElem) qrImgElem.src = currentVendor.qrImage || 'QR.jpeg';
-  if (upiIdElem) upiIdElem.innerText = currentVendor.upiId || 'vendor@lpu.upi';
-
   // Render Top Selling Items for Vendor
   renderVendorTopItems(filteredOrders);
 
-  // Render Orders Queue Table
+  // Render Active Orders Queue Table
   vendorOrdersTbody.innerHTML = '';
   if (allStallOrders.length === 0) {
     vendorOrdersTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 2rem;">No orders placed for ${currentVendor.name} yet. Place an order from the Student Chatbot!</td></tr>`;
-    return;
+  } else {
+    allStallOrders.slice().reverse().forEach(o => {
+      const tr = document.createElement('tr');
+
+      let statusBadgeClass = 'status-pending';
+      if (o.status === 'PREPARING') statusBadgeClass = 'status-preparing';
+      if (o.status === 'READY') statusBadgeClass = 'status-ready';
+      if (o.status === 'DELIVERED') statusBadgeClass = 'status-completed';
+
+      const itemsStr = o.items.map(i => i.name).join(', ');
+      const paymentBadge = `<span class="badge-status status-ready" style="display:inline-flex; flex-direction:column; gap:2px;"><i class="fa-solid fa-circle-check"></i> PAID (UPI Direct)<small style="font-size:0.65rem; opacity:0.85;">${o.txnId || 'TXN-DIRECT'}</small></span>`;
+
+      tr.innerHTML = `
+        <td><strong>${o.id}</strong></td>
+        <td>${o.studentReg}</td>
+        <td>${itemsStr} (₹${o.total})</td>
+        <td>${paymentBadge}</td>
+        <td>${o.pickupSlot}</td>
+        <td>${o.estReadyTime}</td>
+        <td><span class="badge-status ${statusBadgeClass}">${o.status}</span></td>
+        <td>
+          <div class="action-btns-group">
+            ${o.status === 'CONFIRMED' ? `<button class="act-btn btn-prepare" onclick="updateOrderStatus('${o.id}', 'PREPARING')">Mark Preparing</button>` : ''}
+            ${o.status === 'PREPARING' ? `<button class="act-btn btn-ready" onclick="updateOrderStatus('${o.id}', 'READY')">Mark Ready</button>` : ''}
+            ${o.status === 'READY' ? `<button class="act-btn btn-deliver" onclick="updateOrderStatus('${o.id}', 'DELIVERED')">Mark Delivered</button>` : ''}
+            ${o.status === 'DELIVERED' ? `<span style="font-size:0.75rem; color: var(--text-muted);">Done</span>` : ''}
+          </div>
+        </td>
+      `;
+      vendorOrdersTbody.appendChild(tr);
+    });
   }
 
-  allStallOrders.slice().reverse().forEach(o => {
-    const tr = document.createElement('tr');
-
-    let statusBadgeClass = 'status-pending';
-    if (o.status === 'PREPARING') statusBadgeClass = 'status-preparing';
-    if (o.status === 'READY') statusBadgeClass = 'status-ready';
-    if (o.status === 'DELIVERED') statusBadgeClass = 'status-completed';
-
-    const itemsStr = o.items.map(i => i.name).join(', ');
-    const paymentBadge = `<span class="badge-status status-ready" style="display:inline-flex; flex-direction:column; gap:2px;"><i class="fa-solid fa-circle-check"></i> PAID (UPI Direct)<small style="font-size:0.65rem; opacity:0.85;">${o.txnId || 'TXN-DIRECT'}</small></span>`;
-
-    tr.innerHTML = `
-      <td><strong>${o.id}</strong></td>
-      <td>${o.studentReg}</td>
-      <td>${itemsStr} (₹${o.total})</td>
-      <td>${paymentBadge}</td>
-      <td>${o.pickupSlot}</td>
-      <td>${o.estReadyTime}</td>
-      <td><span class="badge-status ${statusBadgeClass}">${o.status}</span></td>
-      <td>
-        <div class="action-btns-group">
-          ${o.status === 'CONFIRMED' ? `<button class="act-btn btn-prepare" onclick="updateOrderStatus('${o.id}', 'PREPARING')">Mark Preparing</button>` : ''}
-          ${o.status === 'PREPARING' ? `<button class="act-btn btn-ready" onclick="updateOrderStatus('${o.id}', 'READY')">Mark Ready</button>` : ''}
-          ${o.status === 'READY' ? `<button class="act-btn btn-deliver" onclick="updateOrderStatus('${o.id}', 'DELIVERED')">Mark Delivered</button>` : ''}
-          ${o.status === 'DELIVERED' ? `<span style="font-size:0.75rem; color: var(--text-muted);">Done</span>` : ''}
-        </div>
-      </td>
-    `;
-    vendorOrdersTbody.appendChild(tr);
-  });
+  // Render Payment History Log Table
+  const paymentsTbody = document.getElementById('vendor-payments-tbody');
+  if (paymentsTbody) {
+    paymentsTbody.innerHTML = '';
+    const paidOrders = allStallOrders.filter(o => o.paymentStatus === 'PAID');
+    if (paidOrders.length === 0) {
+      paymentsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 2rem;">No direct vendor payments received yet.</td></tr>`;
+    } else {
+      paidOrders.slice().reverse().forEach(o => {
+        const tr = document.createElement('tr');
+        const dateStr = new Date(o.createdAt).toLocaleString();
+        tr.innerHTML = `
+          <td><code>${o.txnId || 'TXN-DIRECT'}</code></td>
+          <td><strong>${o.studentReg}</strong></td>
+          <td>${o.id}</td>
+          <td>${o.items.map(i => i.name).join(', ')}</td>
+          <td><strong style="color: var(--accent-green);">₹ ${o.total}</strong></td>
+          <td><small>${dateStr}</small></td>
+          <td><span class="badge-status status-ready"><i class="fa-solid fa-shield-halved"></i> VERIFIED DIRECT UPI</span></td>
+        `;
+        paymentsTbody.appendChild(tr);
+      });
+    }
+  }
 }
 
 function renderVendorTopItems(orderList) {
