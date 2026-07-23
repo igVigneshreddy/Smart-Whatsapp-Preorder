@@ -113,43 +113,18 @@
             <div class="step-item">
               <div class="step-num">3</div>
               <div class="step-info">
-                <strong>Express Express Pickup</strong>
+                <strong>Express Pickup</strong>
                 <p>Skip the crowd and grab your meal instantly</p>
               </div>
             </div>
           </div>
 
-          <div class="student-registration">
-            <div class="registration-card-title">
-              <h3><i class="fa-solid fa-user-pen text-green"></i> Register Student Information</h3>
-              <span class="subtext">Enter registration number to unlock instant food pre-booking</span>
-            </div>
-
-            <!-- Quick Demo Student Selection -->
-            <div class="input-group" style="margin-top: 0.8rem;">
-              <label for="demo-student-select"><i class="fa-solid fa-users"></i> Quick Demo Student Record:</label>
-              <select id="demo-student-select" class="registration-select">
-                <option value="12204891" data-name="Vignesh Reddy">12204891 - Vignesh Reddy (B.Tech CSE - BH-3)</option>
-                <option value="12201122" data-name="Rahul Sharma">12201122 - Rahul Sharma (B.Tech ECE - BH-1)</option>
-                <option value="12209988" data-name="Priya Patel">12209988 - Priya Patel (MBA - GH-2)</option>
-              </select>
-            </div>
-
-            <div class="input-group">
-              <label for="reg-number"><i class="fa-solid fa-id-card"></i> Student Reg Number:</label>
-              <input type="text" id="reg-number" placeholder="e.g. 12204891" value="12204891" required>
-            </div>
-
-            <div class="input-group">
-              <label for="student-name-input"><i class="fa-solid fa-user"></i> Student Name:</label>
-              <input type="text" id="student-name-input" placeholder="e.g. Vignesh Reddy" value="Vignesh Reddy" required>
-            </div>
-
+          <div class="student-gate-trigger-area">
             <button id="start-chat-btn" class="primary-btn ad-cta-btn glow-pulse">
-              <i class="fa-solid fa-user-check"></i> Register Student & Start Pre-Ordering
+              <i class="fa-solid fa-user-check"></i> Register / Verify Student/Staff & Start Pre-Ordering
             </button>
             <div id="registration-status-badge" class="reg-status-pill hidden">
-              <i class="fa-solid fa-circle-check"></i> Student Registered & Verified
+              <i class="fa-solid fa-circle-check"></i> Verified Student/Staff Profile Active
             </div>
           </div>
 
@@ -390,13 +365,38 @@
 
     <!-- ================= ADMIN DASHBOARD ================= -->
     <section id="admin-view" class="view-section">
-      <div class="admin-dashboard">
+      <!-- Admin Login Gate -->
+      <div id="admin-login-card" class="login-card glass-card">
+        <div class="login-icon"><i class="fa-solid fa-user-gear"></i></div>
+        <div class="login-header">
+          <h2>Admin Dashboard Login</h2>
+          <p class="subtext">Enter Admin credentials to access campus analytics and food stall controls</p>
+        </div>
+        <form id="admin-login-form">
+          <div class="input-group">
+            <label><i class="fa-solid fa-user"></i> Admin Username</label>
+            <input type="text" id="admin-id" placeholder="e.g. admin" value="admin" required>
+          </div>
+          <div class="input-group">
+            <label><i class="fa-solid fa-key"></i> Admin Password</label>
+            <input type="password" id="admin-pass" placeholder="e.g. admin123" value="admin123" required>
+          </div>
+          <button type="submit" class="primary-btn full-btn"><i class="fa-solid fa-right-to-bracket"></i> Login to Admin Portal</button>
+          <div class="login-hint">
+            <strong>Demo Admin Credentials:</strong> ID: <code>admin</code> | Pass: <code>admin123</code>
+          </div>
+        </form>
+      </div>
+
+      <!-- Admin Dashboard Content (Hidden until login) -->
+      <div id="admin-dashboard-content" class="admin-dashboard hidden">
         <div class="dashboard-header">
           <div>
             <h2>Developer & Admin Portal</h2>
             <p>Campus Operations, Vendor Performance Analytics & Student Order Insights</p>
           </div>
           <div class="admin-actions">
+            <button id="admin-logout-btn" class="secondary-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
             <button id="export-report-btn" class="primary-btn sm"><i class="fa-solid fa-file-export"></i> Export Sales Report (CSV)</button>
             <div class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Super Admin Mode</div>
           </div>
@@ -537,6 +537,37 @@
     </section>
 
   </main>
+
+  <!-- Modal for Student & Staff Verification Gate -->
+  <div id="student-gate-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-id-card text-green"></i> Student & Staff Verification Gate</h3>
+        <button id="close-student-gate-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="student-gate-form">
+        <div class="input-group">
+          <label for="gate-demo-select"><i class="fa-solid fa-users"></i> Quick Demo Verification Record:</label>
+          <select id="gate-demo-select" class="registration-select">
+            <option value="12204891" data-name="Vignesh Reddy">12204891 - Vignesh Reddy (B.Tech CSE - BH-3) [Student]</option>
+            <option value="12201122" data-name="Rahul Sharma">12201122 - Rahul Sharma (B.Tech ECE - BH-1) [Student]</option>
+            <option value="12209988" data-name="Priya Patel">12209988 - Priya Patel (MBA - GH-2) [Student]</option>
+            <option value="STAFF-9021" data-name="Prof. Anita Verma">STAFF-9021 - Prof. Anita Verma (Dept of CSE) [Staff]</option>
+            <option value="STAFF-4050" data-name="Dr. Suresh Kumar">STAFF-4050 - Dr. Suresh Kumar (Dept of ECE) [Staff]</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="gate-reg-number"><i class="fa-solid fa-id-card"></i> Student / Staff ID Number:</label>
+          <input type="text" id="gate-reg-number" value="12204891" placeholder="e.g. 12204891 or STAFF-9021" required>
+        </div>
+        <div class="input-group">
+          <label for="gate-student-name"><i class="fa-solid fa-user"></i> Full Name:</label>
+          <input type="text" id="gate-student-name" value="Vignesh Reddy" placeholder="e.g. Vignesh Reddy" required>
+        </div>
+        <button type="submit" class="primary-btn full-btn"><i class="fa-solid fa-check"></i> Verify & Start Food Pre-Booking</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal for Vendor Registration & Custom QR Upload -->
   <div id="vendor-register-modal" class="modal-overlay hidden">

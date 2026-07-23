@@ -189,7 +189,11 @@ const vendorQrSettingsModal = document.getElementById('vendor-qr-settings-modal'
 const closeQrSettingsModalBtn = document.getElementById('close-qr-settings-modal-btn');
 const vendorQrSettingsForm = document.getElementById('vendor-qr-settings-form');
 
-// Admin DOM
+// Admin DOM & Auth
+const adminLoginForm = document.getElementById('admin-login-form');
+const adminLoginCard = document.getElementById('admin-login-card');
+const adminDashboardContent = document.getElementById('admin-dashboard-content');
+const adminLogoutBtn = document.getElementById('admin-logout-btn');
 const adminMenuList = document.getElementById('admin-menu-list');
 const addItemBtn = document.getElementById('add-menu-item-btn');
 const itemModal = document.getElementById('item-modal');
@@ -199,6 +203,14 @@ const adminRevenue = document.getElementById('admin-revenue');
 const exportReportBtn = document.getElementById('export-report-btn');
 const studentSearchInput = document.getElementById('student-search-input');
 const studentSearchBtn = document.getElementById('student-search-btn');
+
+// Student Gate Modal DOM
+const studentGateModal = document.getElementById('student-gate-modal');
+const closeStudentGateBtn = document.getElementById('close-student-gate-btn');
+const studentGateForm = document.getElementById('student-gate-form');
+const gateDemoSelect = document.getElementById('gate-demo-select');
+const gateRegNumber = document.getElementById('gate-reg-number');
+const gateStudentName = document.getElementById('gate-student-name');
 
 // Payment Modal DOM
 const paymentModal = document.getElementById('payment-modal');
@@ -316,31 +328,52 @@ function setupChatListeners() {
     if (e.key === 'Enter') handleUserSendMessage();
   });
 
-  const demoStudentSelect = document.getElementById('demo-student-select');
-  const studentNameInput = document.getElementById('student-name-input');
   const regStatusBadge = document.getElementById('registration-status-badge');
 
-  if (demoStudentSelect) {
-    demoStudentSelect.addEventListener('change', (e) => {
+  if (gateDemoSelect) {
+    gateDemoSelect.addEventListener('change', (e) => {
       const selectedOpt = e.target.options[e.target.selectedIndex];
-      regInput.value = selectedOpt.value;
-      if (studentNameInput) studentNameInput.value = selectedOpt.dataset.name || 'Vignesh Reddy';
+      if (gateRegNumber) gateRegNumber.value = selectedOpt.value;
+      if (gateStudentName) gateStudentName.value = selectedOpt.dataset.name || 'Vignesh Reddy';
     });
   }
 
   if (startChatBtn) {
     startChatBtn.addEventListener('click', () => {
-      const regNo = regInput.value.trim() || '12204891';
-      const studentName = studentNameInput ? studentNameInput.value.trim() : 'Vignesh Reddy';
+      if (studentGateModal) studentGateModal.classList.remove('hidden');
+    });
+  }
+
+  if (closeStudentGateBtn) {
+    closeStudentGateBtn.addEventListener('click', () => {
+      if (studentGateModal) studentGateModal.classList.add('hidden');
+    });
+  }
+
+  if (studentGateForm) {
+    studentGateForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const regNo = gateRegNumber.value.trim() || '12204891';
+      const studentName = gateStudentName.value.trim() || 'Vignesh Reddy';
 
       if (!regNo || !studentName) {
-        alert('Please enter a valid Student Registration Number and Student Name.');
+        alert('Please enter a valid Student/Staff Registration Number and Name.');
         return;
       }
 
-      // Light up registration button & show verified status badge
-      startChatBtn.classList.add('glow-pulse');
-      if (regStatusBadge) regStatusBadge.classList.remove('hidden');
+      if (regInput) regInput.value = regNo;
+
+      // Save Student/Staff verification session
+      const studentProfile = { regNo, name: studentName, verifiedAt: new Date().toISOString() };
+      localStorage.setItem('current_student', JSON.stringify(studentProfile));
+
+      if (startChatBtn) startChatBtn.classList.add('glow-pulse');
+      if (regStatusBadge) {
+        regStatusBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verified Profile Active: ${studentName} (${regNo})`;
+        regStatusBadge.classList.remove('hidden');
+      }
+
+      if (studentGateModal) studentGateModal.classList.add('hidden');
 
       // Scroll to WhatsApp simulator
       const simulator = document.querySelector('.whatsapp-container');
@@ -357,11 +390,11 @@ function setupChatListeners() {
       
       let stallOptions = stalls.map(s => ({ label: `📍 ${s.name}`, value: s.name }));
       appendBotBubble(
-        `🎉 <strong>Student Information Verified & Registered!</strong><br><br>` +
-        `👤 <strong>Student Name:</strong> ${studentName}<br>` +
-        `🎴 <strong>Reg Number:</strong> <code>${regNo}</code><br><br>` +
-        `✅ Your student profile is activated for direct vendor pre-orders!<br>` +
-        `Please select a food stall to pre-book from:`,
+        `🎉 <strong>Student / Staff Profile Verified & Activated!</strong><br><br>` +
+        `👤 <strong>Name:</strong> ${studentName}<br>` +
+        `🎴 <strong>ID Number:</strong> <code>${regNo}</code><br><br>` +
+        `✅ Your profile is unlocked for direct vendor pre-orders!<br>` +
+        `Please select a campus food stall to pre-book from:`,
         stallOptions
       );
     });
@@ -1499,33 +1532,57 @@ function updateOrderStatus(orderId, newStatus) {
 // ================= ADMIN DASHBOARD LOGIC =================
 
 function setupAdminListeners() {
-  addItemBtn.addEventListener('click', () => itemModal.classList.remove('hidden'));
-  closeModalBtn.addEventListener('click', () => itemModal.classList.remove('hidden'));
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('admin-id').value.trim();
+      const pass = document.getElementById('admin-pass').value.trim();
 
-  addItemForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const stallName = document.getElementById('modal-stall').value;
-    const itemName = document.getElementById('modal-item-name').value;
-    const price = parseInt(document.getElementById('modal-price').value);
-
-    let stall = stalls.find(s => s.name.toLowerCase() === stallName.toLowerCase());
-    if (!stall) {
-      stall = stalls[0];
-    }
-
-    stall.menu.push({
-      id: 'm_' + Date.now(),
-      category: 'Custom',
-      name: itemName,
-      price: price,
-      available: true
+      if (id === 'admin' && pass === 'admin123') {
+        localStorage.setItem('admin_logged_in', 'true');
+        renderAdminView();
+      } else {
+        alert('❌ Invalid Admin Credentials. Please enter ID: admin and Password: admin123');
+      }
     });
+  }
 
-    saveStalls();
-    renderAdminView();
-    itemModal.classList.add('hidden');
-    addItemForm.reset();
-  });
+  if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('admin_logged_in');
+      renderAdminView();
+    });
+  }
+
+  if (addItemBtn) addItemBtn.addEventListener('click', () => itemModal.classList.remove('hidden'));
+  if (closeModalBtn) closeModalBtn.addEventListener('click', () => itemModal.classList.add('hidden'));
+
+  if (addItemForm) {
+    addItemForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const stallName = document.getElementById('modal-stall').value;
+      const itemName = document.getElementById('modal-item-name').value;
+      const price = parseInt(document.getElementById('modal-price').value);
+
+      let stall = stalls.find(s => s.name.toLowerCase() === stallName.toLowerCase());
+      if (!stall) {
+        stall = stalls[0];
+      }
+
+      stall.menu.push({
+        id: 'm_' + Date.now(),
+        category: 'Custom',
+        name: itemName,
+        price: price,
+        available: true
+      });
+
+      saveStalls();
+      renderAdminView();
+      itemModal.classList.add('hidden');
+      addItemForm.reset();
+    });
+  }
 
   // Admin Timeframe Selector
   const adminTfBtns = document.querySelectorAll('.admin-tf-btn');
@@ -1553,6 +1610,17 @@ function setupAdminListeners() {
 }
 
 function renderAdminView() {
+  const isAdminLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
+
+  if (!isAdminLoggedIn) {
+    if (adminLoginCard) adminLoginCard.classList.remove('hidden');
+    if (adminDashboardContent) adminDashboardContent.classList.add('hidden');
+    return;
+  }
+
+  if (adminLoginCard) adminLoginCard.classList.add('hidden');
+  if (adminDashboardContent) adminDashboardContent.classList.remove('hidden');
+
   const filteredOrders = filterOrdersByTimeframe(orders, adminTimeframe);
   const totalRevenue = filteredOrders.reduce((acc, curr) => acc + curr.total, 0);
 
