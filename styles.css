@@ -41,9 +41,127 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* App Header */
+/* Light Mode Theme Overrides */
+body.light-mode {
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(0, 0, 0, 0.03);
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  background-color: #f1f5f9;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(7, 94, 84, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(37, 211, 102, 0.08) 0px, transparent 50%);
+}
+
+body.light-mode .app-header {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+body.light-mode .glass-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .role-nav {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .nav-btn {
+  color: #64748b;
+}
+
+body.light-mode .nav-btn.active {
+  background: #ffffff;
+  color: #075E54;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .orders-table th {
+  background: #f8fafc;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-mode .orders-table td {
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+body.light-mode .stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+body.light-mode .input-group input,
+body.light-mode .registration-select {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+body.light-mode .modal-card {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .timeframe-bar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+body.light-mode .tf-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+body.light-mode .tf-btn.active {
+  background: #075E54;
+  color: white;
+}
+
+body.light-mode .vendor-subtab-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+body.light-mode .vendor-subtab-btn.active {
+  background: linear-gradient(135deg, #075E54, #128C7E);
+  color: white;
+}
+
+body.light-mode .ad-headline {
+  background: linear-gradient(135deg, #0f172a 30%, #075E54 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light-mode .ad-subline {
+  color: #475569;
+}
+
+body.light-mode .ad-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+}
+
+body.light-mode .student-stat-pill {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+/* App Header Layout */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -55,6 +173,68 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Theme Switcher Toggle Pill */
+.theme-switcher-container {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  border-radius: 30px;
+  cursor: pointer;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.theme-toggle-pill:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+body.light-mode .theme-toggle-pill {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #0f172a;
+}
+
+body.light-mode .theme-toggle-pill:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.theme-icon {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.sun-icon {
+  color: #f59e0b;
+}
+
+.moon-icon {
+  color: #38bdf8;
 }
 
 .logo-area {

@@ -22,17 +22,33 @@
       </div>
     </div>
     
-    <nav class="role-nav">
-      <button class="nav-btn active" data-view="student-view">
-        <i class="fa-solid fa-mobile-screen-button"></i> Student Bot
-      </button>
-      <button class="nav-btn" data-view="vendor-view">
-        <i class="fa-solid fa-store"></i> Vendor Portal
-      </button>
-      <button class="nav-btn" data-view="admin-view">
-        <i class="fa-solid fa-user-gear"></i> Admin Dashboard
-      </button>
-    </nav>
+    <div class="header-right">
+      <nav class="role-nav">
+        <button class="nav-btn active" data-view="student-view">
+          <i class="fa-solid fa-mobile-screen-button"></i> Student Bot
+        </button>
+        <button class="nav-btn" data-view="vendor-view">
+          <i class="fa-solid fa-store"></i> Vendor Portal
+        </button>
+        <button class="nav-btn" data-view="admin-view">
+          <i class="fa-solid fa-user-gear"></i> Admin Dashboard
+        </button>
+      </nav>
+
+      <!-- Dark Mode / Light Mode Theme Toggle -->
+      <div class="theme-switcher-container">
+        <div class="controls" style="display: none;">
+          <label for="sync">Sync <body></label>
+          <input id="sync" type="checkbox"/>
+        </div>
+        <button class="theme-toggle-pill" id="theme-toggle-btn" aria-pressed="false" title="Toggle Dark / Light Mode">
+          <span class="theme-icon sun-icon"><i class="fa-solid fa-sun"></i></span>
+          <span class="theme-icon moon-icon"><i class="fa-solid fa-moon"></i></span>
+          <span class="theme-toggle-slider"></span>
+          <span class="theme-label-text" id="theme-label-span">Dark Mode</span>
+        </button>
+      </div>
+    </div>
   </header>
 
   <main class="main-container">

@@ -207,6 +207,7 @@ const paymentModalContent = document.getElementById('payment-modal-content');
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
+  setupThemeToggle();
   setupViewNavigation();
   setupChatListeners();
   setupVendorListeners();
@@ -226,7 +227,47 @@ document.addEventListener('DOMContentLoaded', () => {
       checkOrderStatusChanges();
     }
   });
-});
+// Theme Toggle Manager (Dark / Light Mode)
+function setupThemeToggle() {
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const syncCheckbox = document.getElementById('sync');
+  const themeLabelSpan = document.getElementById('theme-label-span');
+
+  const savedTheme = localStorage.getItem('campus_theme') || 'dark';
+
+  const applyTheme = (theme) => {
+    if (theme === 'light') {
+      document.body.classList.add('light-mode');
+      if (themeToggleBtn) themeToggleBtn.setAttribute('aria-pressed', 'true');
+      if (syncCheckbox) syncCheckbox.checked = true;
+      if (themeLabelSpan) themeLabelSpan.innerText = 'Light Mode';
+    } else {
+      document.body.classList.remove('light-mode');
+      if (themeToggleBtn) themeToggleBtn.setAttribute('aria-pressed', 'false');
+      if (syncCheckbox) syncCheckbox.checked = false;
+      if (themeLabelSpan) themeLabelSpan.innerText = 'Dark Mode';
+    }
+  };
+
+  applyTheme(savedTheme);
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const isLight = document.body.classList.contains('light-mode');
+      const newTheme = isLight ? 'dark' : 'light';
+      localStorage.setItem('campus_theme', newTheme);
+      applyTheme(newTheme);
+    });
+  }
+
+  if (syncCheckbox) {
+    syncCheckbox.addEventListener('change', () => {
+      const newTheme = syncCheckbox.checked ? 'light' : 'dark';
+      localStorage.setItem('campus_theme', newTheme);
+      applyTheme(newTheme);
+    });
+  }
+}
 
 // View Navigation
 function setupViewNavigation() {
