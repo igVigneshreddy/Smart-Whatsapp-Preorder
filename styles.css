@@ -1767,3 +1767,39 @@ body {
   border-color: #25D366;
   box-shadow: 0 4px 15px rgba(7, 94, 84, 0.4);
 }
+
+/* Stock Status Buttons */
+.stock-toggle-btn {
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.stock-toggle-btn.in-stock {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25D366;
+  border-color: rgba(37, 211, 102, 0.4);
+}
+
+.stock-toggle-btn.in-stock:hover {
+  background: rgba(37, 211, 102, 0.25);
+  transform: translateY(-1px);
+}
+
+.stock-toggle-btn.out-stock {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.stock-toggle-btn.out-stock:hover {
+  background: rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
+}

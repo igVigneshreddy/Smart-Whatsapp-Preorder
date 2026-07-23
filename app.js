@@ -523,8 +523,14 @@ function processBotResponse(userText) {
       chatState.selectedCategory = chosenCat;
       chatState.step = 'SELECT_ITEMS';
 
-      const itemsInCat = stall.menu.filter(i => i.category === chosenCat && i.available);
-      let itemOptions = itemsInCat.map(i => ({ label: `➕ ${i.name} (₹${i.price})`, value: i.name }));
+      const allItemsInCat = stall.menu.filter(i => i.category === chosenCat);
+      let itemOptions = allItemsInCat.map(i => {
+        if (i.available !== false) {
+          return { label: `➕ ${i.name} (₹${i.price})`, value: i.name };
+        } else {
+          return { label: `❌ ${i.name} (Out of Stock)`, value: `OUT_OF_STOCK_${i.name}` };
+        }
+      });
       itemOptions.push({ label: '📂 Switch Category', value: 'SWITCH_CAT' });
 
       appendBotBubble(`Items in <strong>${chosenCat}</strong>:`, itemOptions);
@@ -546,9 +552,19 @@ function processBotResponse(userText) {
       return;
     }
 
+    if (userText.includes('OUT_OF_STOCK_')) {
+      appendBotBubble(`⚠️ Sorry! That item is currently <strong>Out of Stock</strong> at ${stall.name}. Please select another item or category!`);
+      return;
+    }
+
     const foundItem = stall.menu.find(i => userText.includes(i.name));
 
     if (foundItem) {
+      if (foundItem.available === false) {
+        appendBotBubble(`⚠️ Sorry! <strong>${foundItem.name}</strong> is currently <strong>Out of Stock</strong> at ${stall.name}. Please select an item that is in stock.`);
+        return;
+      }
+
       chatState.cartItems.push(foundItem);
       const itemsListStr = chatState.cartItems.map(i => i.name).join(', ');
       const total = chatState.cartItems.reduce((acc, curr) => acc + curr.price, 0);
@@ -993,25 +1009,42 @@ function setupVendorListeners() {
     });
   });
 
-  // Vendor Dashboard Subtabs (Active Orders vs Payment History)
+  // Vendor Dashboard Subtabs (Active Orders vs Menu Inventory vs Payment History)
   const tabOrders = document.getElementById('vendor-tab-orders');
+  const tabInventory = document.getElementById('vendor-tab-inventory');
   const tabPayments = document.getElementById('vendor-tab-payments');
+  
   const secOrders = document.getElementById('vendor-active-orders-section');
+  const secInventory = document.getElementById('vendor-inventory-section');
   const secPayments = document.getElementById('vendor-payment-history-section');
 
-  if (tabOrders && tabPayments) {
+  if (tabOrders && tabInventory && tabPayments) {
     tabOrders.addEventListener('click', () => {
       tabOrders.classList.add('active');
+      tabInventory.classList.remove('active');
       tabPayments.classList.remove('active');
       secOrders.classList.remove('hidden');
+      secInventory.classList.add('hidden');
       secPayments.classList.add('hidden');
+    });
+
+    tabInventory.addEventListener('click', () => {
+      tabInventory.classList.add('active');
+      tabOrders.classList.remove('active');
+      tabPayments.classList.remove('active');
+      secInventory.classList.remove('hidden');
+      secOrders.classList.add('hidden');
+      secPayments.classList.add('hidden');
+      renderVendorMenuInventory();
     });
 
     tabPayments.addEventListener('click', () => {
       tabPayments.classList.add('active');
       tabOrders.classList.remove('active');
+      tabInventory.classList.remove('active');
       secPayments.classList.remove('hidden');
       secOrders.classList.add('hidden');
+      secInventory.classList.add('hidden');
     });
   }
 }
@@ -1023,6 +1056,57 @@ function setupVendorModals() {
   }
   if (closeRegisterModalBtn) {
     closeRegisterModalBtn.addEventListener('click', () => vendorRegisterModal.classList.add('hidden'));
+  }
+
+  // Vendor Open Add Item Modal Button
+  const vendorOpenAddItemBtn = document.getElementById('vendor-open-add-item-btn');
+  const vendorItemModal = document.getElementById('vendor-item-modal');
+  const closeVendorItemModalBtn = document.getElementById('close-vendor-item-modal-btn');
+  const vendorItemForm = document.getElementById('vendor-item-form');
+
+  if (vendorOpenAddItemBtn) {
+    vendorOpenAddItemBtn.addEventListener('click', () => openVendorItemModal(null));
+  }
+  if (closeVendorItemModalBtn) {
+    closeVendorItemModalBtn.addEventListener('click', () => vendorItemModal.classList.add('hidden'));
+  }
+
+  if (vendorItemForm) {
+    vendorItemForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!currentVendor) return;
+
+      const itemId = document.getElementById('vendor-item-id-input').value;
+      const name = document.getElementById('vendor-item-name-input').value.trim();
+      const category = document.getElementById('vendor-item-cat-input').value.trim();
+      const price = parseInt(document.getElementById('vendor-item-price-input').value);
+      const isAvailable = document.getElementById('vendor-item-stock-input').value === 'true';
+
+      const stallIdx = stalls.findIndex(s => s.id === currentVendor.id);
+      if (stallIdx === -1) return;
+
+      if (itemId) {
+        // Edit existing item
+        const itemIdx = stalls[stallIdx].menu.findIndex(i => i.id === itemId);
+        if (itemIdx !== -1) {
+          stalls[stallIdx].menu[itemIdx] = { id: itemId, category, name, price, available: isAvailable };
+        }
+      } else {
+        // Add new item
+        const newItem = { id: 'm_' + Date.now(), category, name, price, available: isAvailable };
+        stalls[stallIdx].menu.push(newItem);
+      }
+
+      currentVendor = stalls[stallIdx];
+      localStorage.setItem('current_vendor', JSON.stringify(currentVendor));
+      saveStalls();
+
+      vendorItemModal.classList.add('hidden');
+      vendorItemForm.reset();
+      alert(`✅ Menu item "${name}" saved successfully!`);
+      renderVendorDashboard();
+      renderAdminView();
+    });
   }
 
   vendorRegisterForm.addEventListener('submit', (e) => {
@@ -1207,6 +1291,114 @@ function renderVendorDashboard() {
         `;
         paymentsTbody.appendChild(tr);
       });
+    }
+  }
+
+  // Render Vendor Menu & Stock Inventory
+  renderVendorMenuInventory();
+}
+
+function renderVendorMenuInventory() {
+  const tbody = document.getElementById('vendor-inventory-tbody');
+  if (!tbody || !currentVendor) return;
+
+  tbody.innerHTML = '';
+  const vendorMenu = currentVendor.menu || [];
+
+  if (vendorMenu.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 2rem;">No menu items listed for ${currentVendor.name} yet. Click "Add New Item to Menu" above to add food items!</td></tr>`;
+    return;
+  }
+
+  vendorMenu.forEach(item => {
+    const tr = document.createElement('tr');
+    const isAvailable = item.available !== false;
+    const stockBtnClass = isAvailable ? 'in-stock' : 'out-stock';
+    const stockBtnIcon = isAvailable ? 'fa-circle-check' : 'fa-circle-xmark';
+    const stockBtnText = isAvailable ? 'In Stock' : 'Out of Stock';
+
+    tr.innerHTML = `
+      <td><strong>${item.name}</strong></td>
+      <td><span class="subtext">${item.category || 'General'}</span></td>
+      <td><strong style="color: var(--accent-green);">₹ ${item.price}</strong></td>
+      <td>
+        <button class="stock-toggle-btn ${stockBtnClass}" onclick="toggleVendorItemStock('${item.id}')">
+          <i class="fa-solid ${stockBtnIcon}"></i> ${stockBtnText}
+        </button>
+      </td>
+      <td>
+        <div class="action-btns-group">
+          <button class="act-btn btn-prepare" onclick="openVendorItemModal('${item.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+          <button class="act-btn btn-deliver" style="background: rgba(239,68,68,0.2); color:#f87171;" onclick="deleteVendorMenuItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleVendorItemStock(itemId) {
+  if (!currentVendor) return;
+  const stallIdx = stalls.findIndex(s => s.id === currentVendor.id);
+  if (stallIdx === -1) return;
+
+  const item = stalls[stallIdx].menu.find(i => i.id === itemId);
+  if (item) {
+    item.available = item.available === false ? true : false;
+    currentVendor = stalls[stallIdx];
+    localStorage.setItem('current_vendor', JSON.stringify(currentVendor));
+    saveStalls();
+    renderVendorDashboard();
+    renderAdminView();
+  }
+}
+
+function openVendorItemModal(itemId) {
+  if (!currentVendor) return;
+  const modal = document.getElementById('vendor-item-modal');
+  const title = document.getElementById('vendor-item-modal-title');
+  const idInput = document.getElementById('vendor-item-id-input');
+  const nameInput = document.getElementById('vendor-item-name-input');
+  const catInput = document.getElementById('vendor-item-cat-input');
+  const priceInput = document.getElementById('vendor-item-price-input');
+  const stockInput = document.getElementById('vendor-item-stock-input');
+
+  if (itemId) {
+    const item = currentVendor.menu.find(i => i.id === itemId);
+    if (item) {
+      title.innerHTML = `<i class="fa-solid fa-pen-to-square text-green"></i> Edit Menu Item (${item.name})`;
+      idInput.value = item.id;
+      nameInput.value = item.name;
+      catInput.value = item.category || 'General';
+      priceInput.value = item.price;
+      stockInput.value = item.available !== false ? 'true' : 'false';
+    }
+  } else {
+    title.innerHTML = `<i class="fa-solid fa-plus-circle text-green"></i> Add New Menu Item (${currentVendor.name})`;
+    idInput.value = '';
+    nameInput.value = '';
+    catInput.value = 'Special';
+    priceInput.value = '80';
+    stockInput.value = 'true';
+  }
+
+  modal.classList.remove('hidden');
+}
+
+function deleteVendorMenuItem(itemId) {
+  if (!currentVendor) return;
+  const item = currentVendor.menu.find(i => i.id === itemId);
+  if (!item) return;
+
+  if (confirm(`Are you sure you want to delete "${item.name}" from your stall menu?`)) {
+    const stallIdx = stalls.findIndex(s => s.id === currentVendor.id);
+    if (stallIdx !== -1) {
+      stalls[stallIdx].menu = stalls[stallIdx].menu.filter(i => i.id !== itemId);
+      currentVendor = stalls[stallIdx];
+      localStorage.setItem('current_vendor', JSON.stringify(currentVendor));
+      saveStalls();
+      renderVendorDashboard();
+      renderAdminView();
     }
   }
 }

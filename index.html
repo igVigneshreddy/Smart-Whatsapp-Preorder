@@ -286,6 +286,7 @@
         <!-- Vendor Dashboard Sub-Tabs -->
         <div class="vendor-subtabs-bar">
           <button id="vendor-tab-orders" class="vendor-subtab-btn active"><i class="fa-solid fa-list-check"></i> Active Orders Queue</button>
+          <button id="vendor-tab-inventory" class="vendor-subtab-btn"><i class="fa-solid fa-boxes-stacked"></i> Menu & Stock Inventory</button>
           <button id="vendor-tab-payments" class="vendor-subtab-btn"><i class="fa-solid fa-receipt"></i> Payment History Log</button>
         </div>
 
@@ -311,6 +312,33 @@
               </thead>
               <tbody id="vendor-orders-tbody">
                 <!-- Dynamic order rows rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Vendor Menu & Stock Inventory Management Section -->
+        <div id="vendor-inventory-section" class="orders-section glass-card hidden">
+          <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h3><i class="fa-solid fa-boxes-stacked text-green"></i> Stall Menu & Stock Inventory Management</h3>
+              <span class="subtext">Control item availability (In Stock / Out of Stock) and manage menu prices directly</span>
+            </div>
+            <button id="vendor-open-add-item-btn" class="primary-btn sm"><i class="fa-solid fa-plus-circle"></i> Add New Item to Menu</button>
+          </div>
+          <div class="table-responsive" style="margin-top: 1rem;">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Price (₹)</th>
+                  <th>Stock Availability</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vendor-inventory-tbody">
+                <!-- Dynamic inventory rows rendered here -->
               </tbody>
             </table>
           </div>
@@ -570,6 +598,39 @@
           <input type="number" id="modal-price" placeholder="70" required>
         </div>
         <button type="submit" class="primary-btn full-btn">Save Item</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Vendor Menu Item Add/Edit -->
+  <div id="vendor-item-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3 id="vendor-item-modal-title"><i class="fa-solid fa-utensils text-green"></i> Add Menu Item</h3>
+        <button id="close-vendor-item-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="vendor-item-form">
+        <input type="hidden" id="vendor-item-id-input">
+        <div class="input-group">
+          <label>Item Name</label>
+          <input type="text" id="vendor-item-name-input" placeholder="e.g. Special Cheese Pasta" required>
+        </div>
+        <div class="input-group">
+          <label>Category</label>
+          <input type="text" id="vendor-item-cat-input" placeholder="e.g. Pasta / Snacks / Beverages" required>
+        </div>
+        <div class="input-group">
+          <label>Price (₹)</label>
+          <input type="number" id="vendor-item-price-input" placeholder="80" required>
+        </div>
+        <div class="input-group">
+          <label>Stock Availability Status</label>
+          <select id="vendor-item-stock-input" class="registration-select">
+            <option value="true">🟢 In Stock (Available for Ordering)</option>
+            <option value="false">🔴 Out of Stock (Disabled in Chatbot)</option>
+          </select>
+        </div>
+        <button type="submit" class="primary-btn full-btn"><i class="fa-solid fa-floppy-disk"></i> Save Menu Item</button>
       </form>
     </div>
   </div>
